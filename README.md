@@ -145,7 +145,7 @@ pnpm test                # unit tests + randomized multi-browser sync simulation
 pnpm build && node scripts/e2e.mjs        # two real Edge profiles syncing over WebDAV
 pnpm build && node scripts/screenshots.mjs  # regenerate docs/screenshots
 pnpm zip && pnpm zip:firefox
-pnpm local -- "C:\path	oolder"  # build into the folder Chrome loads ("Load unpacked"); later just: pnpm local
+pnpm local -- "D:/xezina-chrome"  # build into the folder Chrome loads ("Load unpacked"); later just: pnpm local
 ```
 
 `pnpm local` keeps the same folder, so the extension id, data and settings stay. A running Xezina
