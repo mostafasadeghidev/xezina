@@ -281,4 +281,6 @@ export const ar: Strings = {
   refreshFailed: "تعذّر الوصول إلى الموقع ({status})",
   noImageHint: "لا توجد صورة معاينة لهذه الصفحة. افتحها وانتظر حتى تكتمل، ثم استخدم زر الكاميرا في نافذة Xezina.",
   needsAccess: "اسمح أولًا لـ Xezina بقراءة الصفحات (الإعدادات ← المعاينات).",
+  takeScreenshot: "التقاط لقطة",
+  takingScreenshot: "جارٍ فتح الموقع…",
 };

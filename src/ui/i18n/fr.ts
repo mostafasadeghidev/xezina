@@ -281,4 +281,6 @@ export const fr: Strings = {
   refreshFailed: "Site injoignable ({status})",
   noImageHint: "Cette page n’a pas d’image d’aperçu. Ouvrez-la, attendez qu’elle soit chargée, puis utilisez l’appareil photo dans la fenêtre Xezina.",
   needsAccess: "Autorisez d’abord Xezina à lire les pages (Paramètres → Aperçus).",
+  takeScreenshot: "Prendre une capture",
+  takingScreenshot: "Ouverture du site…",
 };

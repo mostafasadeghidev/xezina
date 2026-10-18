@@ -450,6 +450,36 @@ async function enrichOne(rec: Rec, s: Settings, refresh = false): Promise<Refres
   return { status: info.status, hasImage: !!img || keepImage };
 }
 
+/**
+ * Opens the bookmark in its own window, waits until the page has finished
+ * drawing, takes a screenshot as its preview and closes the window again.
+ */
+export async function shootPage(id: string): Promise<string> {
+  if (!(await hasAllUrls())) throw new Error('needs-access');
+  const rec = await db.records.get(id);
+  if (!rec?.v.url || !/^https?:/i.test(rec.v.url) || isProtectedPage(rec.v.url)) throw new Error('Not a web page');
+  const focused = await browser.windows.getLastFocused().catch(() => null);
+  const win = await browser.windows.create({ url: rec.v.url, type: 'popup', width: 1280, height: 860, focused: true });
+  if (!win) throw new Error('Could not open the page');
+  const tabId = win.tabs?.[0]?.id;
+  try {
+    if (win.id === undefined || tabId === undefined) throw new Error('Could not open the page');
+    // Wait for "load" (at most 25 s), then give script-drawn pages time to settle.
+    const deadline = Date.now() + 25_000;
+    while (Date.now() < deadline) {
+      const t = await browser.tabs.get(tabId);
+      if (t.status === 'complete') break;
+      await new Promise((r) => setTimeout(r, 300));
+    }
+    await new Promise((r) => setTimeout(r, 4000));
+    await browser.windows.update(win.id, { focused: true });
+    return await capture(win.id, id);
+  } finally {
+    if (win.id !== undefined) await browser.windows.remove(win.id).catch(() => undefined);
+    if (focused?.id !== undefined) await browser.windows.update(focused.id, { focused: true }).catch(() => undefined);
+  }
+}
+
 /** "Refresh info" for one bookmark; waits for the result. */
 export async function refreshOne(id: string): Promise<RefreshResult> {
   if (!(await hasAllUrls())) throw new Error('needs-access');

@@ -281,4 +281,6 @@ export const pt: Strings = {
   refreshFailed: "Não foi possível acessar o site ({status})",
   noImageHint: "Esta página não tem imagem de prévia. Abra, espere carregar e use a câmera na janela do Xezina.",
   needsAccess: "Permita primeiro que o Xezina leia as páginas (Configurações → Prévias).",
+  takeScreenshot: "Tirar captura",
+  takingScreenshot: "Abrindo o site…",
 };

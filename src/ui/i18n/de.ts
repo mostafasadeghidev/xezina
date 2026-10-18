@@ -281,4 +281,6 @@ export const de: Strings = {
   refreshFailed: "Website nicht erreichbar ({status})",
   noImageHint: "Diese Seite hat kein Vorschaubild. Öffnen, vollständig laden lassen, dann die Kamera im Xezina-Fenster nutzen.",
   needsAccess: "Erlauben Sie Xezina zuerst, Seiten zu lesen (Einstellungen → Vorschauen).",
+  takeScreenshot: "Screenshot aufnehmen",
+  takingScreenshot: "Website wird geöffnet…",
 };

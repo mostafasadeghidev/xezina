@@ -280,6 +280,8 @@ export const en = {
   refreshFailed: "The site could not be reached ({status})",
   noImageHint: "This page has no preview image. Open it, wait until it has loaded, then use the camera in Xezina’s window.",
   needsAccess: "Allow Xezina to read pages first (Settings → Previews).",
+  takeScreenshot: "Take screenshot",
+  takingScreenshot: "Opening the site…",
 };
 
 export type Strings = typeof en;

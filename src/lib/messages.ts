@@ -17,6 +17,7 @@ export type Message =
   | { type: 'enrich'; ids?: string[]; force?: boolean }
   | { type: 'enrich:stop' }
   | { type: 'refresh'; id: string }
+  | { type: 'shoot'; id: string }
   | { type: 'capture'; tabId: number; windowId: number; id: string }
   | { type: 'blob:fetch'; hash: string }
   | { type: 'image:set'; id: string; dataUrl: string }

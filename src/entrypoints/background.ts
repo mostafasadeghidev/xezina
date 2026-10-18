@@ -27,6 +27,7 @@ import {
   onBookmarkEvent,
   removeNative,
   refreshOne,
+  shootPage,
   reschedule,
   restoreBackup,
   scheduleEnrich,
@@ -66,6 +67,8 @@ async function handle(msg: Message): Promise<unknown> {
       return true;
     case 'refresh':
       return refreshOne(msg.id);
+    case 'shoot':
+      return shootPage(msg.id);
     case 'enrich:stop':
       stopEnrich();
       return true;

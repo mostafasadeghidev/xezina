@@ -23,6 +23,7 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
   const [parent, setParent] = useState('');
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [shooting, setShooting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -87,6 +88,23 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
     }
   };
 
+  /** Opens the site in its own window and screenshots it once it has loaded. */
+  const shoot = async () => {
+    const origins = ['<all_urls>'];
+    if (!(await browser.permissions.contains({ origins }))) {
+      if (!(await browser.permissions.request({ origins }))) return toast(t('needsAccess'), 'error');
+    }
+    setShooting(true);
+    try {
+      await send({ type: 'shoot', id });
+      toast(t('done'));
+    } catch (e) {
+      toast((e as Error).message === 'needs-access' ? t('needsAccess') : (e as Error).message, 'error');
+    } finally {
+      setShooting(false);
+    }
+  };
+
   const remove = async () => {
     if (!(await confirm({ message: t('confirmDelete', { n: 1 }), ok: t('delete'), cancel: t('cancel'), danger: true }))) return;
     try {
@@ -127,7 +145,12 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
           <div className="group relative aspect-[16/10] overflow-hidden rounded-xl border border-line bg-hover">
             <Preview node={node} remote={remote} />
-            <div className="absolute inset-x-2 bottom-2 flex justify-end gap-1.5 opacity-0 transition group-hover:opacity-100">
+            <div
+              className={cx(
+                'absolute inset-x-2 bottom-2 flex flex-wrap justify-end gap-1.5 transition group-hover:opacity-100',
+                refreshing || shooting ? 'opacity-100' : 'opacity-0',
+              )}
+            >
               <button
                 onClick={() => void refresh()}
                 disabled={refreshing}
@@ -135,6 +158,14 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
               >
                 <RefreshCw className={cx('size-3.5', refreshing && 'animate-spin')} />
                 {refreshing ? t('refreshing') : t('refreshPreview')}
+              </button>
+              <button
+                onClick={() => void shoot()}
+                disabled={shooting}
+                className="flex items-center gap-1 rounded-md bg-black/55 px-2 py-1 text-xs text-white backdrop-blur hover:bg-black/70 disabled:opacity-80"
+              >
+                <Camera className={cx('size-3.5', shooting && 'animate-pulse')} />
+                {shooting ? t('takingScreenshot') : t('takeScreenshot')}
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
@@ -245,6 +276,7 @@ export function AddDialog({ lib, open, onClose, folder }: { lib: Library; open: 
   const [parent, setParent] = useState<string>(folder ?? ROOT.other);
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [shooting, setShooting] = useState(false);
   useEffect(() => {
     if (open) {
       setUrl('');

@@ -74,6 +74,15 @@ try {
   await sleep(2500);
   r = await rec(SITE + 'new');
   assert(r?.v.siteTitle === 'New page', 'changing the address reads the new page automatically');
+  const before = page.context().pages().length;
+  const t0 = Date.now();
+  res = await msg({ type: 'shoot', id: r.id });
+  assert(res.ok, `screenshot taken in its own window (${res.ok ? '' : res.error})`);
+  r = await rec(SITE + 'new');
+  assert(r.v.imgSrc === 'shot' && r.v.img, 'the screenshot became the preview');
+  await sleep(500);
+  assert(page.context().pages().length === before, 'the window closed itself');
+  console.log(`   took ${Math.round((Date.now() - t0) / 1000)} s`);
   console.log('\nALL GOOD');
 } finally {
   await ctx.close();

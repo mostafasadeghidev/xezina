@@ -281,4 +281,6 @@ export const it: Strings = {
   refreshFailed: "Sito non raggiungibile ({status})",
   noImageHint: "Questa pagina non ha un’immagine di anteprima. Aprila, attendi che sia caricata, poi usa la fotocamera nella finestra di Xezina.",
   needsAccess: "Consenti prima a Xezina di leggere le pagine (Impostazioni → Anteprime).",
+  takeScreenshot: "Scatta screenshot",
+  takingScreenshot: "Apertura del sito…",
 };
