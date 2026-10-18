@@ -20,6 +20,7 @@ import {
   maybeAutoCapture,
   onBrowserBookmarked,
   onNotificationClicked,
+  onWindowFocused,
   setImporting,
   moveNative,
   onBookmarkEvent,
@@ -162,6 +163,10 @@ export default defineBackground(() => {
     if (b) void browser.alarms.create('xezina-local-build', { periodInMinutes: 1 });
   });
   void checkLocalBuild();
+
+  browser.windows?.onFocusChanged.addListener((windowId) => {
+    if (windowId !== browser.windows.WINDOW_ID_NONE) void onWindowFocused();
+  });
 
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'xezina-local-build') void checkLocalBuild();

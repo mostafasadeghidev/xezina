@@ -332,7 +332,7 @@ function SyncTab() {
               onChange={(e) => void update({ intervalMin: Number(e.target.value) }).then(() => send({ type: 'reschedule' }))}
               className="!h-8 !w-20"
             >
-              {[5, 10, 15, 30, 60].map((m) => (
+              {[1, 5, 10, 15, 30, 60].map((m) => (
                 <option key={m} value={m}>
                   {m}
                 </option>

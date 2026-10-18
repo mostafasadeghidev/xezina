@@ -12,6 +12,8 @@ export interface Settings {
   autoSync: boolean;
   /** Minutes between background syncs. */
   intervalMin: number;
+  /** Set once the old 15-minute default has been moved to 1 minute. */
+  intervalMigrated?: boolean;
   remote: RemoteConfig | null;
   /** OAuth tokens for Dropbox / Google Drive / OneDrive. */
   tokens: OAuthTokens | null;
@@ -35,7 +37,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   deviceName: '',
   autoSync: true,
-  intervalMin: 15,
+  intervalMin: 1,
   remote: null,
   tokens: null,
   clientIds: {},

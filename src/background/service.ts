@@ -166,7 +166,10 @@ export function sync(req: SyncRequest = {}): Promise<SyncReport | null> {
       });
       if (remote) {
         await setStatus({ state: 'idle', lastSync: Date.now(), lastError: '', pendingDeletes: undefined, devices: report.devices.length ? report.devices : (await getStatus()).devices });
-        await log(true, mode, summary(report), Date.now() - t0, report);
+        const a = report.applied;
+        const didSomething =
+          mode !== 'normal' || report.localChanges || report.remoteChanges || report.joined || a.created || a.updated || a.moved || a.removed;
+        if (didSomething) await log(true, mode, summary(report), Date.now() - t0, report);
         if (settings.previews.syncImages) void uploadBlobs(remote, key).catch(() => undefined);
       }
       return report;
@@ -285,6 +288,16 @@ export async function editTags(ids: string[], add: string[] = [], remove: string
 // ---------------------------------------------------------------- scheduling
 
 let remoteTimer: ReturnType<typeof setTimeout> | undefined;
+let lastFocusSync = 0;
+
+/** Sync when the user comes back to this browser, so changes made elsewhere show up at once. */
+export async function onWindowFocused() {
+  if (Date.now() - lastFocusSync < 20_000) return;
+  const s = await getSettings();
+  if (!s.remote || !s.autoSync) return;
+  lastFocusSync = Date.now();
+  void sync().catch(() => undefined);
+}
 let scanTimer: ReturnType<typeof setTimeout> | undefined;
 
 /** Debounced sync after local edits. */
@@ -310,7 +323,11 @@ export function onBookmarkEvent() {
 }
 
 export async function reschedule() {
-  const s = await getSettings();
+  let s = await getSettings();
+  // Older installs saved the former 15-minute default; move them to 1 minute once.
+  if (!s.intervalMigrated) {
+    s = await saveSettings({ intervalMin: s.intervalMin === 15 ? 1 : s.intervalMin, intervalMigrated: true });
+  }
   await browser.alarms.clear('xezina-sync');
   if (s.remote && s.autoSync) {
     await browser.alarms.create('xezina-sync', { periodInMinutes: Math.max(1, s.intervalMin), delayInMinutes: 0.2 });
