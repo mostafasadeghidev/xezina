@@ -420,7 +420,7 @@ async function enrichOne(rec: Rec, s: Settings, refresh = false): Promise<Refres
   const keepImage = rec.v.imgSrc === 'shot' || rec.v.imgSrc === 'user';
   const wantImage = refresh ? !keepImage : !rec.v.img;
   let img = '';
-  if (info.image && wantImage) {
+  if (info.image && wantImage && info.status >= 200 && info.status < 400) {
     const raw = await downloadImage(info.image);
     if (raw) {
       try {
@@ -434,7 +434,7 @@ async function enrichOne(rec: Rec, s: Settings, refresh = false): Promise<Refres
   const fix = await findFix(rec.v.url as string, info).catch(() => ({ url: '', kind: '' as const }));
   await mutate([rec.id], (r, clock) => {
     const patch: Partial<FieldValues> = { status: info.status, checkedAt: Date.now(), fixUrl: fix.url, fixKind: fix.kind };
-    if (info.desc && (refresh || !r.v.desc)) patch.desc = info.desc;
+    if (reached && info.desc && (refresh || !r.v.desc)) patch.desc = info.desc;
     if (img && (refresh || !r.v.img)) {
       patch.img = img;
       patch.imgSrc = 'og';
@@ -444,7 +444,7 @@ async function enrichOne(rec: Rec, s: Settings, refresh = false): Promise<Refres
       patch.imgSrc = '';
     }
     // The browser title stays exactly as the user set it (even empty); the page title is kept aside.
-    if (info.title && info.title !== r.v.siteTitle) patch.siteTitle = info.title;
+    if (reached && info.title && info.title !== r.v.siteTitle) patch.siteTitle = info.title;
     return setFields(r, patch, clock);
   });
   if (img && s.previews.syncImages) scheduleRemoteSync(30_000);

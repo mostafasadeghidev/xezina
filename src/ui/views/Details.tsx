@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { hostOf } from '../../core/normalize';
 import { ROOT } from '../../core/types';
-import { linkHealth } from '../../enrich/metadata';
+import { linkHealth, needsOwnWindow } from '../../enrich/metadata';
 import { send } from '../../lib/messages';
 import { FolderSelect, Preview, TagInput } from '../components/bits';
 import { LiveFrame } from '../components/LiveFrame';
@@ -26,7 +26,7 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
   const [refreshing, setRefreshing] = useState(false);
   const [shooting, setShooting] = useState(false);
   const [live, setLive] = useState(false);
-  const canLive = !import.meta.env.FIREFOX && /^https?:/i.test(node?.url ?? '');
+  const canLive = !import.meta.env.FIREFOX && /^https?:/i.test(node?.url ?? '') && !needsOwnWindow(node?.url ?? '');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

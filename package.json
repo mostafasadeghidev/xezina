@@ -1,7 +1,7 @@
 {
   "name": "xezina",
   "description": "Sync, organize and search your bookmarks across every browser — with the storage of your choice.",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "type": "module",
   "license": "MIT",

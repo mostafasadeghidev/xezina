@@ -295,4 +295,5 @@ export const fr: Strings = {
   fixAll: "Tout corriger ({n})",
   fixAllConfirm: "Remplacer l’adresse de {n} favoris par celles suggérées ? Une sauvegarde est faite avant.",
   archived: "Copie archivée",
+  liveLeft: "Le site est passé à une autre page dans ce cadre (connexion peut-être requise). Une fenêtre séparée affiche la vraie page.",
 };

@@ -33,6 +33,7 @@ export function LiveFrame({
   const [scale, setScale] = useState(0.3);
   const [src, setSrc] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [loads, setLoads] = useState(0);
   const [capturing, setCapturing] = useState(false);
 
   useLayoutEffect(() => {
@@ -84,7 +85,10 @@ export function LiveFrame({
           title="live"
           // No top navigation: a page cannot take over Xezina.
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-          onLoad={() => setLoaded(true)}
+          onLoad={() => {
+            setLoaded(true);
+            setLoads((n) => n + 1);
+          }}
           // `zoom`, not a transform: a transformed cross-site frame may not be painted.
           style={{ width: PAGE_W, height: PAGE_H, zoom: scale, border: 0 }}
         />
@@ -93,6 +97,14 @@ export function LiveFrame({
         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-hover text-xs text-muted">
           <Loader2 className="size-4 animate-spin" />
           {t('liveLoading')}
+        </div>
+      )}
+      {loads > 1 && !capturing && (
+        <div className="absolute inset-x-2 top-2 flex flex-wrap items-center gap-2 rounded-md bg-warn/90 px-2.5 py-1.5 text-xs text-black" dir="auto">
+          <span className="min-w-0 flex-1">{t('liveLeft')}</span>
+          <button onClick={onWindow} className="rounded bg-black/80 px-2 py-0.5 text-white hover:bg-black">
+            {t('openInWindow')}
+          </button>
         </div>
       )}
       {!capturing && (
