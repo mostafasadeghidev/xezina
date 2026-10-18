@@ -275,6 +275,11 @@ export const en = {
   saveChanges: "Save changes",
   withScreenshot: "Save a screenshot of this page",
   hasScreenshot: "Has a screenshot — click to take a new one",
+  refreshing: "Refreshing…",
+  refreshed: "Updated",
+  refreshFailed: "The site could not be reached ({status})",
+  noImageHint: "This page has no preview image. Open it, wait until it has loaded, then use the camera in Xezina’s window.",
+  needsAccess: "Allow Xezina to read pages first (Settings → Previews).",
 };
 
 export type Strings = typeof en;

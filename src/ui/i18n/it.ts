@@ -276,4 +276,9 @@ export const it: Strings = {
   saveChanges: "Salva modifiche",
   withScreenshot: "Salva uno screenshot di questa pagina",
   hasScreenshot: "Ha uno screenshot — clicca per farne uno nuovo",
+  refreshing: "Aggiornamento…",
+  refreshed: "Aggiornato",
+  refreshFailed: "Sito non raggiungibile ({status})",
+  noImageHint: "Questa pagina non ha un’immagine di anteprima. Aprila, attendi che sia caricata, poi usa la fotocamera nella finestra di Xezina.",
+  needsAccess: "Consenti prima a Xezina di leggere le pagine (Impostazioni → Anteprime).",
 };

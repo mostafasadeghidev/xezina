@@ -276,4 +276,9 @@ export const pt: Strings = {
   saveChanges: "Salvar alterações",
   withScreenshot: "Salvar uma captura desta página",
   hasScreenshot: "Tem uma captura — clique para tirar outra",
+  refreshing: "Atualizando…",
+  refreshed: "Atualizado",
+  refreshFailed: "Não foi possível acessar o site ({status})",
+  noImageHint: "Esta página não tem imagem de prévia. Abra, espere carregar e use a câmera na janela do Xezina.",
+  needsAccess: "Permita primeiro que o Xezina leia as páginas (Configurações → Prévias).",
 };

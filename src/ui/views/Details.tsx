@@ -1,5 +1,6 @@
 import { ArrowUpRight, Camera, ImagePlus, RefreshCw, Star, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { browser } from 'wxt/browser';
 import { hostOf } from '../../core/normalize';
 import { ROOT } from '../../core/types';
 import { linkHealth } from '../../enrich/metadata';
@@ -21,6 +22,7 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
   const [tags, setTags] = useState<string[]>([]);
   const [parent, setParent] = useState('');
   const [busy, setBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -67,6 +69,24 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
     }
   };
 
+  /** Reads the page again; asks for page access on this same click if needed. */
+  const refresh = async () => {
+    const origins = ['<all_urls>'];
+    if (!(await browser.permissions.contains({ origins }))) {
+      if (!(await browser.permissions.request({ origins }))) return toast(t('needsAccess'), 'error');
+    }
+    setRefreshing(true);
+    try {
+      const r = await send<{ status: number; hasImage: boolean }>({ type: 'refresh', id });
+      if (r.status === 0 || r.status >= 400) toast(t('refreshFailed', { status: r.status || '—' }), 'error');
+      else toast(r.hasImage ? t('refreshed') : `${t('refreshed')} · ${t('noImageHint')}`);
+    } catch (e) {
+      toast((e as Error).message === 'needs-access' ? t('needsAccess') : (e as Error).message, 'error');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const remove = async () => {
     if (!(await confirm({ message: t('confirmDelete', { n: 1 }), ok: t('delete'), cancel: t('cancel'), danger: true }))) return;
     try {
@@ -109,11 +129,12 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
             <Preview node={node} remote={remote} />
             <div className="absolute inset-x-2 bottom-2 flex justify-end gap-1.5 opacity-0 transition group-hover:opacity-100">
               <button
-                onClick={() => void send({ type: 'enrich', ids: [id] })}
-                className="flex items-center gap-1 rounded-md bg-black/55 px-2 py-1 text-xs text-white backdrop-blur hover:bg-black/70"
+                onClick={() => void refresh()}
+                disabled={refreshing}
+                className="flex items-center gap-1 rounded-md bg-black/55 px-2 py-1 text-xs text-white backdrop-blur hover:bg-black/70 disabled:opacity-80"
               >
-                <RefreshCw className="size-3.5" />
-                {t('refreshPreview')}
+                <RefreshCw className={cx('size-3.5', refreshing && 'animate-spin')} />
+                {refreshing ? t('refreshing') : t('refreshPreview')}
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
@@ -223,6 +244,7 @@ export function AddDialog({ lib, open, onClose, folder }: { lib: Library; open: 
   const [title, setTitle] = useState('');
   const [parent, setParent] = useState<string>(folder ?? ROOT.other);
   const [busy, setBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
     if (open) {
       setUrl('');

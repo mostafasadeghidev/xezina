@@ -276,4 +276,9 @@ export const fr: Strings = {
   saveChanges: "Enregistrer les modifications",
   withScreenshot: "Enregistrer une capture de cette page",
   hasScreenshot: "Capture enregistrée — cliquez pour en prendre une nouvelle",
+  refreshing: "Actualisation…",
+  refreshed: "Mis à jour",
+  refreshFailed: "Site injoignable ({status})",
+  noImageHint: "Cette page n’a pas d’image d’aperçu. Ouvrez-la, attendez qu’elle soit chargée, puis utilisez l’appareil photo dans la fenêtre Xezina.",
+  needsAccess: "Autorisez d’abord Xezina à lire les pages (Paramètres → Aperçus).",
 };

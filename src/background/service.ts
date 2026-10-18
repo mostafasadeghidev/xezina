@@ -234,6 +234,8 @@ export async function editNative(id: string, changes: { title?: string; url?: st
   if (changes.url !== undefined) clean.url = changes.url;
   await browser.bookmarks.update(await nativeIdOf(id), clean);
   await sync({ localOnly: true });
+  // A new address means a new page: read it again.
+  if (clean.url && (await hasAllUrls())) void refreshOne(id).catch(() => undefined);
 }
 
 export async function moveNative(ids: string[], parent: string, index?: number) {
@@ -402,10 +404,23 @@ async function storeBlob(blob: Blob): Promise<string> {
   return hash;
 }
 
-async function enrichOne(rec: Rec, s: Settings) {
+export interface RefreshResult {
+  status: number;
+  hasImage: boolean;
+}
+
+/**
+ * Reads the page and stores its title, description, preview image and link
+ * status. With `refresh`, values from an earlier read are replaced (the
+ * address may have changed); screenshots and user images are never replaced,
+ * nor are the user's own title, display name, notes or tags.
+ */
+async function enrichOne(rec: Rec, s: Settings, refresh = false): Promise<RefreshResult> {
   const info = await fetchPage(rec.v.url as string);
+  const keepImage = rec.v.imgSrc === 'shot' || rec.v.imgSrc === 'user';
+  const wantImage = refresh ? !keepImage : !rec.v.img;
   let img = '';
-  if (info.image && !rec.v.img) {
+  if (info.image && wantImage) {
     const raw = await downloadImage(info.image);
     if (raw) {
       try {
@@ -415,19 +430,33 @@ async function enrichOne(rec: Rec, s: Settings) {
       }
     }
   }
+  const reached = info.status > 0 && info.status < 400;
   await mutate([rec.id], (r, clock) => {
     const patch: Partial<FieldValues> = { status: info.status, checkedAt: Date.now() };
-    if (info.desc && !r.v.desc) patch.desc = info.desc;
-    if (img && !r.v.img) {
+    if (info.desc && (refresh || !r.v.desc)) patch.desc = info.desc;
+    if (img && (refresh || !r.v.img)) {
       patch.img = img;
       patch.imgSrc = 'og';
+    } else if (refresh && reached && !keepImage && r.v.imgSrc === 'og') {
+      // The page no longer has a preview image: drop the old one.
+      patch.img = '';
+      patch.imgSrc = '';
     }
     // The browser title stays exactly as the user set it (even empty); the page title is kept aside.
     if (info.title && info.title !== r.v.siteTitle) patch.siteTitle = info.title;
-    const changed = setFields(r, patch, clock);
-    return changed;
+    return setFields(r, patch, clock);
   });
   if (img && s.previews.syncImages) scheduleRemoteSync(30_000);
+  return { status: info.status, hasImage: !!img || keepImage };
+}
+
+/** "Refresh info" for one bookmark; waits for the result. */
+export async function refreshOne(id: string): Promise<RefreshResult> {
+  if (!(await hasAllUrls())) throw new Error('needs-access');
+  const rec = await db.records.get(id);
+  if (!rec?.v.url || !/^https?:/i.test(rec.v.url)) throw new Error('Not a web page');
+  if (isProtectedPage(rec.v.url)) return { status: -1, hasImage: !!rec.v.img };
+  return enrichOne(rec, await getSettings(), true);
 }
 
 /** Screenshot of a visible tab as the bookmark's preview. */
@@ -457,13 +486,18 @@ export async function maybeAutoCapture(tab: { id?: number; windowId?: number; ur
   const rec = all.find((r) => r.v.kind === 'bookmark' && !r.v.del && r.v.url && normalizeUrl(r.v.url) === key);
   if (!rec || rec.v.imgSrc === 'shot' || rec.v.imgSrc === 'user') return;
   recentCaptures.set(key, Date.now());
-  await new Promise((r) => setTimeout(r, 1500));
-  const [current] = await browser.tabs.query({ active: true, windowId: tab.windowId });
-  if (!current || current.id !== tab.id) return;
-  try {
-    await capture(tab.windowId, rec.id);
-  } catch {
-    // window not focused, a protected page, etc.
+  // Pages that draw themselves with scripts (Webflow, React apps…) keep
+  // changing after "load": take a picture after a short wait, then a second
+  // one later that replaces it once the page has settled.
+  for (const wait of [3000, 6000]) {
+    await new Promise((r) => setTimeout(r, wait));
+    const [current] = await browser.tabs.query({ active: true, windowId: tab.windowId });
+    if (!current || current.id !== tab.id || !current.url || normalizeUrl(current.url) !== key) return;
+    try {
+      await capture(tab.windowId, rec.id);
+    } catch {
+      return; // window not focused, a protected page, etc.
+    }
   }
 }
 

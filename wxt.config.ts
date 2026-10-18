@@ -31,6 +31,8 @@ export default defineConfig({
       'https://graph.microsoft.com/*',
       'https://login.microsoftonline.com/*',
       'https://github.com/login/*',
+      // Test builds only (XEZINA_E2E=1): page access granted up front so previews can be tested.
+      ...(process.env.XEZINA_E2E ? ['<all_urls>'] : []),
     ],
     omnibox: { keyword: 'bm' },
     commands: {

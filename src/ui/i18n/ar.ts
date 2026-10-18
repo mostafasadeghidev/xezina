@@ -276,4 +276,9 @@ export const ar: Strings = {
   saveChanges: "حفظ التغييرات",
   withScreenshot: "حفظ لقطة لهذه الصفحة",
   hasScreenshot: "لديه لقطة شاشة؛ انقر لالتقاط لقطة جديدة",
+  refreshing: "جارٍ التحديث…",
+  refreshed: "تم التحديث",
+  refreshFailed: "تعذّر الوصول إلى الموقع ({status})",
+  noImageHint: "لا توجد صورة معاينة لهذه الصفحة. افتحها وانتظر حتى تكتمل، ثم استخدم زر الكاميرا في نافذة Xezina.",
+  needsAccess: "اسمح أولًا لـ Xezina بقراءة الصفحات (الإعدادات ← المعاينات).",
 };
