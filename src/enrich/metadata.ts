@@ -184,6 +184,25 @@ export function parentUrls(url: string): string[] {
   }
 }
 
+/** The same address with a lowercase path, without the query, or with/without a trailing slash. */
+export function sameShapeUrls(url: string): string[] {
+  try {
+    const u = new URL(url);
+    const path = u.pathname;
+    const lower = path.toLowerCase();
+    const flip = path.endsWith('/') ? path.replace(/\/+$/, '') : path + '/';
+    const out = [
+      lower !== path ? u.origin + lower + u.search : '',
+      lower !== path && u.search ? u.origin + lower : '',
+      u.search ? u.origin + path : '',
+      path !== '/' ? u.origin + flip : '',
+    ].filter(Boolean);
+    return [...new Set(out)].filter((x) => x !== url);
+  } catch {
+    return [];
+  }
+}
+
 function isRootUrl(url: string): boolean {
   try {
     const u = new URL(url);
@@ -208,6 +227,15 @@ export async function findFix(url: string, info: PageInfo, fetcher = fetchPage):
     return { url: final, kind: 'moved' };
   }
   if (info.status !== 404 && info.status !== 410) return { url: '', kind: '' };
+  // First the same page under a slightly different address (sites that
+  // switched to lowercase slugs, or that reject old tracking parameters).
+  for (const candidate of sameShapeUrls(url)) {
+    const r = await fetcher(candidate, 10_000);
+    if (r.status >= 200 && r.status < 400 && !LOGINISH.test(r.finalUrl)) {
+      const target = r.finalUrl || candidate;
+      if (!isRootUrl(target)) return { url: target, kind: 'moved' };
+    }
+  }
   for (const candidate of parentUrls(url)) {
     const r = await fetcher(candidate, 10_000);
     if (r.status >= 200 && r.status < 400 && !LOGINISH.test(r.finalUrl)) {

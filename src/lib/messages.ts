@@ -19,6 +19,9 @@ export type Message =
   | { type: 'refresh'; id: string }
   | { type: 'shoot'; id: string }
   | { type: 'frame:allow' }
+  | { type: 'fix:apply'; ids: string[] }
+  | { type: 'fix:undo'; ids: string[] }
+  | { type: 'fix:keep'; ids: string[] }
   | { type: 'shot:set'; id: string; dataUrl: string }
   | { type: 'capture'; tabId: number; windowId: number; id: string }
   | { type: 'blob:fetch'; hash: string }

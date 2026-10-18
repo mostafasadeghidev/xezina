@@ -295,4 +295,13 @@ export const de: Strings = {
   fixAll: "Alle korrigieren ({n})",
   fixAllConfirm: "Die Adresse von {n} Lesezeichen auf die vorgeschlagenen ändern? Vorher wird gesichert.",
   archived: "Archivkopie",
+  rangeHint: "Umschalt+Klick wählt einen Bereich",
+  fixedGroup: "Korrigiert – rückgängig machbar",
+  undo: "Rückgängig",
+  undoAll: "Alle rückgängig ({n})",
+  keepFix: "Behalten",
+  keepAll: "Alle behalten",
+  fixSelected: "Auswahl korrigieren ({n})",
+  undoSelected: "Auswahl rückgängig ({n})",
+  wasAddress: "Vorher",
 };

@@ -46,6 +46,10 @@ export interface FieldValues {
   fixUrl: string;
   /** Why: the page moved, or it is gone but a parent page / the site works. */
   fixKind: 'moved' | 'parent' | 'root' | '';
+  /** Address before a suggested fix was applied (so the fix can be undone). */
+  prevUrl: string;
+  /** The kind of that fix. */
+  prevKind: 'moved' | 'parent' | 'root' | '';
 }
 
 export type FieldName = keyof FieldValues;

@@ -29,6 +29,9 @@ import {
   refreshOne,
   shootPage,
   allowFraming,
+  applyFixes,
+  undoFixes,
+  keepFixes,
   setShot,
   reschedule,
   restoreBackup,
@@ -71,6 +74,12 @@ async function handle(msg: Message, sender?: { tab?: { id?: number } }): Promise
       return refreshOne(msg.id);
     case 'shoot':
       return shootPage(msg.id);
+    case 'fix:apply':
+      return applyFixes(msg.ids);
+    case 'fix:undo':
+      return undoFixes(msg.ids);
+    case 'fix:keep':
+      return keepFixes(msg.ids);
     case 'frame:allow':
       return allowFraming(sender?.tab?.id);
     case 'shot:set':

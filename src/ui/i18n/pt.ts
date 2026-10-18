@@ -295,4 +295,13 @@ export const pt: Strings = {
   fixAll: "Corrigir todos ({n})",
   fixAllConfirm: "Trocar o endereço de {n} favoritos pelos sugeridos? Um backup é feito antes.",
   archived: "Cópia arquivada",
+  rangeHint: "Shift+clique seleciona um intervalo",
+  fixedGroup: "Corrigidos — dá para desfazer",
+  undo: "Desfazer",
+  undoAll: "Desfazer todos ({n})",
+  keepFix: "Manter",
+  keepAll: "Manter todos",
+  fixSelected: "Corrigir selecionados ({n})",
+  undoSelected: "Desfazer selecionados ({n})",
+  wasAddress: "Antes",
 };

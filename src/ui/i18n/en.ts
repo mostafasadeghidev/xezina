@@ -294,6 +294,15 @@ export const en = {
   fixAll: "Fix all ({n})",
   fixAllConfirm: "Change the address of {n} bookmarks to the suggested ones? A backup is made first.",
   archived: "Archived copy",
+  rangeHint: "Shift+click selects a range",
+  fixedGroup: "Fixed — can be undone",
+  undo: "Undo",
+  undoAll: "Undo all ({n})",
+  keepFix: "Keep",
+  keepAll: "Keep all",
+  fixSelected: "Fix selected ({n})",
+  undoSelected: "Undo selected ({n})",
+  wasAddress: "Was",
 };
 
 export type Strings = typeof en;

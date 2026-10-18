@@ -295,4 +295,13 @@ export const it: Strings = {
   fixAll: "Correggi tutti ({n})",
   fixAllConfirm: "Cambiare l’indirizzo di {n} segnalibri con quelli suggeriti? Prima viene fatto un backup.",
   archived: "Copia archiviata",
+  rangeHint: "Maiusc+clic seleziona un intervallo",
+  fixedGroup: "Corretti — annullabile",
+  undo: "Annulla",
+  undoAll: "Annulla tutti ({n})",
+  keepFix: "Tieni",
+  keepAll: "Tieni tutti",
+  fixSelected: "Correggi selezionati ({n})",
+  undoSelected: "Annulla selezionati ({n})",
+  wasAddress: "Prima",
 };

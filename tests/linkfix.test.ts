@@ -44,4 +44,18 @@ describe('link fixer', () => {
     expect(await findFix('http://a.com/x', page(200, 'https://www.a.com/x/'), site([]))).toEqual({ url: '', kind: '' });
     expect(await findFix('https://a.com/private', page(200, 'https://a.com/login?next=/private'), site([]))).toEqual({ url: '', kind: '' });
   });
+
+  it('finds the same page under a lowercase address (Webflow slugs)', async () => {
+    const old = 'https://webflow.com/made-in-webflow/website/Joseph-Berry-Text-Effects?s=joseph';
+    const fix = await findFix(old, page(404, ''), site([
+      'https://webflow.com/made-in-webflow/website/joseph-berry-text-effects',
+      'https://webflow.com/made-in-webflow/website',
+    ]));
+    expect(fix).toEqual({ url: 'https://webflow.com/made-in-webflow/website/joseph-berry-text-effects', kind: 'moved' });
+  });
+
+  it('drops a query the site no longer accepts', async () => {
+    const fix = await findFix('https://a.com/page?ref=old', page(404, ''), site(['https://a.com/page', 'https://a.com/']));
+    expect(fix).toEqual({ url: 'https://a.com/page', kind: 'moved' });
+  });
 });

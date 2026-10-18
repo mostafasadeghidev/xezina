@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, CopyCheck, Folder } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { displayTitle } from '../../core/normalize';
 import { Favicon, useFolderName } from '../components/bits';
 import { Badge, Button, cx } from '../components/ui';
@@ -54,10 +54,18 @@ export function Duplicates({
 
   const extras = groups.flatMap((g) => g.ids.filter((id) => id !== g.keep));
 
-  const toggle = (id: string) => {
+  const anchor = useRef<string | null>(null);
+  /** Click toggles; Shift+click selects every row from the last clicked one. */
+  const toggle = (id: string, shift = false) => {
+    const order = groups.flatMap((g) => g.ids);
     const n = new Set(selected);
-    if (n.has(id)) n.delete(id);
+    if (shift && anchor.current && order.includes(anchor.current)) {
+      const a = order.indexOf(anchor.current);
+      const b = order.indexOf(id);
+      for (const x of order.slice(Math.min(a, b), Math.max(a, b) + 1)) n.add(x);
+    } else if (n.has(id)) n.delete(id);
     else n.add(id);
+    anchor.current = id;
     setSelected(n);
   };
 
@@ -104,7 +112,7 @@ export function Duplicates({
               return (
                 <div key={id} className={cx('flex items-center gap-3 border-b border-line px-4 py-2.5 last:border-b-0', isSel && 'bg-danger/5')}>
                   <button
-                    onClick={() => toggle(id)}
+                    onClick={(e) => toggle(id, e.shiftKey)}
                     className={cx(
                       'flex size-5 shrink-0 items-center justify-center rounded border transition',
                       isSel ? 'border-danger bg-danger text-white' : 'border-line text-transparent hover:border-muted',

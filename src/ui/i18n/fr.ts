@@ -295,4 +295,13 @@ export const fr: Strings = {
   fixAll: "Tout corriger ({n})",
   fixAllConfirm: "Remplacer l’adresse de {n} favoris par celles suggérées ? Une sauvegarde est faite avant.",
   archived: "Copie archivée",
+  rangeHint: "Maj+clic sélectionne une plage",
+  fixedGroup: "Corrigés — annulable",
+  undo: "Annuler",
+  undoAll: "Tout annuler ({n})",
+  keepFix: "Garder",
+  keepAll: "Tout garder",
+  fixSelected: "Corriger la sélection ({n})",
+  undoSelected: "Annuler la sélection ({n})",
+  wasAddress: "Avant",
 };

@@ -24,7 +24,7 @@ const shop = http.createServer((req, res) => {
     res.writeHead(301, { Location: '/guides/new-guide' });
     return res.end();
   }
-  if (['/', '/shop/', '/guides/new-guide'].includes(req.url)) {
+  if (['/', '/shop/', '/guides/new-guide', '/items/blue-shoe', '/items/red-hat'].includes(req.url)) {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     return res.end(html('ok ' + req.url));
   }
@@ -69,6 +69,8 @@ try {
       ['Old guide', `${S}/old-guide`],
       ['Gone', `${E}/a/b`],
       ['Fine', `${S}/`],
+      ['Blue shoe', `${S}/items/Blue-Shoe?ref=old`],
+      ['Red hat', `${S}/items/Red-Hat`],
     ],
   );
   await page.goto(`chrome-extension://${id}/manager.html#/library/all`);
@@ -86,6 +88,7 @@ try {
   assert(by['Old guide'].fixKind === 'moved' && by['Old guide'].fixUrl === `${S}/guides/new-guide`, 'moved page → suggests the new address');
   assert(by['Gone'].status === 404 && !by['Gone'].fixUrl, 'site with nothing left → no suggestion');
   assert(!by['Fine'].fixUrl, 'working bookmark → nothing to fix');
+  assert(by['Blue shoe'].fixKind === 'moved' && by['Blue shoe'].fixUrl === `${S}/items/blue-shoe`, 'capitalised slug → the same page in lowercase');
 
   await page.goto(`chrome-extension://${id}/manager.html#/library/broken`);
   await page.waitForSelector('text=The page is gone, but the site works');
@@ -93,16 +96,41 @@ try {
   assert((await page.getByText('Nothing found on the site').count()) === 1, 'the dead site has its own group');
   await page.screenshot({ path: path.join(SHOTS, 'f7-broken.png') });
 
-  await page.locator('button', { hasText: 'Use this address' }).first().click();
-  await sleep(2500);
+  // Shift+click selects a range of rows.
+  const boxes = page.locator('section').filter({ hasText: 'Moved to a new address' }).locator('button[aria-label=select]');
+  await boxes.nth(0).click();
+  await boxes.nth(2).click({ modifiers: ['Shift'] });
+  assert((await page.getByText('Fix selected (3)').count()) === 1, 'Shift+click selected the three moved pages');
+  const backupsBefore = await page.evaluate(async () => {
+    const req = indexedDB.open('xezina');
+    const db = await new Promise((r) => (req.onsuccess = () => r(req.result)));
+    return new Promise((r) => {
+      const q = db.transaction('backups').objectStore('backups').count();
+      q.onsuccess = () => r(q.result);
+    });
+  });
+  await page.getByText('Fix selected (3)').click();
+  await sleep(3000);
   const urls = await sw.evaluate(async () => (await chrome.bookmarks.search({})).filter((b) => b.url).map((b) => b.url));
-  assert(urls.includes(`${S}/shop/`) && !urls.includes(`${S}/shop/item-5`), '"Use this address" changes the bookmark');
+  assert(urls.includes(`${S}/items/blue-shoe`) && urls.includes(`${S}/guides/new-guide`), 'the selected bookmarks got their new addresses');
+  const backupsAfter = await page.evaluate(async () => {
+    const req = indexedDB.open('xezina');
+    const db = await new Promise((r) => (req.onsuccess = () => r(req.result)));
+    return new Promise((r) => {
+      const q = db.transaction('backups').objectStore('backups').count();
+      q.onsuccess = () => r(q.result);
+    });
+  });
+  assert(backupsAfter === backupsBefore + 1, 'a backup was made before fixing');
+  await page.screenshot({ path: path.join(SHOTS, 'f8-fixed.png') });
+  assert((await page.getByText('Fixed — can be undone').count()) === 1, 'fixed bookmarks are listed for undo');
 
-  await page.locator('button', { hasText: /^Fix all/ }).click();
-  await page.locator('.fixed button', { hasText: /^Fix all/ }).click();
+  await page.locator('button', { hasText: /^Undo all/ }).click();
   await sleep(3000);
   const urls2 = await sw.evaluate(async () => (await chrome.bookmarks.search({})).filter((b) => b.url).map((b) => b.url));
-  assert(urls2.includes(`${S}/guides/new-guide`), '"Fix all" applies the remaining suggestion');
+  assert(urls2.includes(`${S}/items/Blue-Shoe?ref=old`) && urls2.includes(`${S}/old-guide`), '"Undo all" restores the old addresses');
+  const back = Object.fromEntries((await records()).map((r) => [r.v.title, r.v]));
+  assert(back['Blue shoe'].fixUrl === `${S}/items/blue-shoe` && !back['Blue shoe'].prevUrl, 'after undo the suggestion is offered again');
   console.log('\nALL GOOD');
 } finally {
   await ctx.close();

@@ -295,4 +295,13 @@ export const ar: Strings = {
   fixAll: "إصلاح الكل ({n})",
   fixAllConfirm: "هل تريد تغيير عنوان {n} من الإشارات إلى العناوين المقترحة؟ تُؤخذ نسخة احتياطية أولًا.",
   archived: "نسخة مؤرشفة",
+  rangeHint: "Shift+نقرة يحدد نطاقًا",
+  fixedGroup: "تم إصلاحها — يمكن التراجع",
+  undo: "تراجع",
+  undoAll: "التراجع عن الكل ({n})",
+  keepFix: "إبقاء",
+  keepAll: "إبقاء الكل",
+  fixSelected: "إصلاح المحدد ({n})",
+  undoSelected: "التراجع عن المحدد ({n})",
+  wasAddress: "كان",
 };

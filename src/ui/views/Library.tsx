@@ -156,13 +156,26 @@ export function LibraryView({
   })();
   const crumbs = folderNode && !isRoot(folderNode.id) ? pathOf(lib.tree, folderNode.id) : [];
 
-  const toggle = (id: string) =>
-    setSelected((s) => {
-      const n = new Set(s);
-      if (n.has(id)) n.delete(id);
-      else n.add(id);
-      return n;
-    });
+  const anchor = useRef<string | null>(null);
+  /** Click toggles one item; Shift+click selects everything from the last clicked item. */
+  const pick = (id: string, shift = false) => {
+    const ids = items.map((i) => i.id);
+    if (shift && anchor.current && ids.includes(anchor.current)) {
+      const a = ids.indexOf(anchor.current);
+      const b = ids.indexOf(id);
+      const range = ids.slice(Math.min(a, b), Math.max(a, b) + 1);
+      setSelected((s) => new Set([...s, ...range]));
+    } else {
+      setSelected((s) => {
+        const n = new Set(s);
+        if (n.has(id)) n.delete(id);
+        else n.add(id);
+        return n;
+      });
+    }
+    anchor.current = id;
+  };
+  const toggle = (id: string) => pick(id);
 
   const run = async (p: Promise<unknown>) => {
     try {
@@ -289,12 +302,15 @@ export function LibraryView({
               <p className="mt-0.5 text-sm text-muted">{t('results', { n: items.length })}</p>
             </div>
             {items.length > 0 && (
-              <button
-                className="shrink-0 text-xs text-muted hover:text-fg"
-                onClick={() => setSelected(selected.size === items.length ? new Set() : new Set(items.map((i) => i.id)))}
-              >
-                {t('selectAll')}
-              </button>
+              <div className="flex shrink-0 items-center gap-3">
+                {items.length > 1 && <span className="hidden text-[11px] text-muted lg:inline">{t('rangeHint')}</span>}
+                <button
+                  className="text-xs text-muted hover:text-fg"
+                  onClick={() => setSelected(selected.size === items.length ? new Set() : new Set(items.map((i) => i.id)))}
+                >
+                  {t('selectAll')}
+                </button>
+              </div>
             )}
           </div>
 
@@ -308,7 +324,7 @@ export function LibraryView({
           )}
 
           {filter.kind === 'broken' && !query.trim() && items.length > 0 ? (
-            <BrokenLinks items={items} openDetails={openDetails} remote={remote} />
+            <BrokenLinks items={items} openDetails={openDetails} remote={remote} selected={selected} pick={pick} clear={() => setSelected(new Set())} />
           ) : filter.kind === 'dups' && !query.trim() && items.length > 0 ? (
             <Duplicates lib={lib} selected={selected} setSelected={setSelected} openDetails={openDetails} remote={remote} />
           ) : items.length === 0 ? (
@@ -335,7 +351,7 @@ export function LibraryView({
                   size={size}
                   selected={selected.has(n.id)}
                   selecting={selected.size > 0}
-                  onSelect={() => toggle(n.id)}
+                  onSelect={(shift) => pick(n.id, shift)}
                   onOpen={() => openDetails(n.id)}
                   onDragStart={(e) => onDragStart(e, n.id)}
                 />
@@ -351,7 +367,7 @@ export function LibraryView({
                   remote={remote}
                   selected={selected.has(n.id)}
                   selecting={selected.size > 0}
-                  onSelect={() => toggle(n.id)}
+                  onSelect={(shift) => pick(n.id, shift)}
                   onOpen={() => openDetails(n.id)}
                   onDragStart={(e) => onDragStart(e, n.id)}
                   showPath={filter.kind !== 'folder' || !!query}
@@ -368,7 +384,7 @@ export function LibraryView({
                   remote={remote}
                   compact={mode === 'compact'}
                   selected={selected.has(n.id)}
-                  onSelect={() => toggle(n.id)}
+                  onSelect={(shift) => pick(n.id, shift)}
                   onOpen={() => openDetails(n.id)}
                   onDragStart={(e) => onDragStart(e, n.id)}
                 />
@@ -475,7 +491,7 @@ function CardItem({
   remote: boolean;
   selected: boolean;
   selecting: boolean;
-  onSelect: () => void;
+  onSelect: (shift: boolean) => void;
   onOpen: () => void;
   onDragStart: (e: DragEvent) => void;
   showPath: boolean;
@@ -501,7 +517,7 @@ function CardItem({
         onClick={(e) => {
           if (selecting) {
             e.preventDefault();
-            onSelect();
+            onSelect(e.shiftKey);
           }
         }}
         className="relative block aspect-[16/10] overflow-hidden border-b border-line bg-hover"
@@ -514,7 +530,7 @@ function CardItem({
         )}
       </a>
       <button
-        onClick={onSelect}
+        onClick={(e) => onSelect(e.shiftKey)}
         aria-label="select"
         className={cx(
           'absolute start-2 top-2 flex size-6 items-center justify-center rounded-md border transition',
@@ -584,7 +600,7 @@ function Row({
   remote: boolean;
   compact?: boolean;
   selected: boolean;
-  onSelect: () => void;
+  onSelect: (shift: boolean) => void;
   onOpen: () => void;
   onDragStart: (e: DragEvent) => void;
 }) {
@@ -603,7 +619,7 @@ function Row({
       )}
     >
       <button
-        onClick={onSelect}
+        onClick={(e) => onSelect(e.shiftKey)}
         className={cx(
           'flex size-5 shrink-0 items-center justify-center rounded border transition',
           selected ? 'border-accent bg-accent text-accent-fg' : 'border-line text-transparent group-hover:border-muted',
@@ -739,7 +755,7 @@ function Tile({
   size: number;
   selected: boolean;
   selecting: boolean;
-  onSelect: () => void;
+  onSelect: (shift: boolean) => void;
   onOpen: () => void;
   onDragStart: (e: DragEvent) => void;
 }) {
@@ -763,7 +779,7 @@ function Tile({
         onClick={(e) => {
           if (selecting) {
             e.preventDefault();
-            onSelect();
+            onSelect(e.shiftKey);
           }
         }}
         className="flex w-full flex-col items-center gap-2 hover:no-underline"
@@ -776,7 +792,7 @@ function Tile({
         </span>
       </a>
       <button
-        onClick={onSelect}
+        onClick={(e) => onSelect(e.shiftKey)}
         aria-label="select"
         className={cx(
           'absolute start-1.5 top-1.5 flex size-5 items-center justify-center rounded border transition',

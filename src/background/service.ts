@@ -493,12 +493,13 @@ async function captureWhenSettled(windowId: number): Promise<string> {
   await sleep(5000);
   let prev = await shot();
   let still = 0;
+  // An odd interval, so a looping loader is unlikely to look "the same" by chance.
   while (Date.now() - start < 30_000) {
-    await sleep(1500);
+    await sleep(1130);
     const next = await shot();
     still = same(prev, next) ? still + 1 : 0;
     prev = next;
-    if (still >= 2) break; // unchanged for about 3 s
+    if (still >= 3) break; // unchanged for about 3.5 s
   }
   return prev;
 }
@@ -534,6 +535,66 @@ export async function allowFraming(tabId: number | undefined) {
 /** A screenshot cropped by the page (live preview) becomes the preview. */
 export async function setShot(id: string, dataUrl: string) {
   return storeShot(id, dataUrl);
+}
+
+/**
+ * Applies suggested addresses. The old address is kept on the record so the
+ * fix can be undone, and the library is backed up first.
+ */
+export async function applyFixes(ids: string[]) {
+  const recs = ((await db.records.bulkGet(ids)).filter(Boolean) as Rec[]).filter((r) => r.v.fixUrl && r.v.url);
+  if (!recs.length) return 0;
+  await backup((await loadDevice()).state, 'fix');
+  const plan = recs.map((r) => ({ id: r.id, from: r.v.url as string, to: r.v.fixUrl as string, kind: r.v.fixKind ?? '' }));
+  await mutate(
+    plan.map((p) => p.id),
+    (r, clock) => {
+      const p = plan.find((x) => x.id === r.id)!;
+      // The old check was for the old address.
+      return setFields(r, { prevUrl: p.from, prevKind: p.kind, fixUrl: '', fixKind: '', checkedAt: 0 }, clock);
+    },
+  );
+  await setUrls(plan.map((p) => [p.id, p.to]));
+  void recheck(plan.map((p) => p.id));
+  return plan.length;
+}
+
+/** Puts back the address a fix replaced; the suggestion shows again. */
+export async function undoFixes(ids: string[]) {
+  const recs = ((await db.records.bulkGet(ids)).filter(Boolean) as Rec[]).filter((r) => r.v.prevUrl);
+  if (!recs.length) return 0;
+  const plan = recs.map((r) => ({ id: r.id, back: r.v.prevUrl as string, fixed: r.v.url as string, kind: r.v.prevKind || 'moved' }));
+  await mutate(
+    plan.map((p) => p.id),
+    (r, clock) => {
+      const p = plan.find((x) => x.id === r.id)!;
+      return setFields(r, { prevUrl: '', prevKind: '', fixUrl: p.fixed, fixKind: p.kind, checkedAt: 0 }, clock);
+    },
+  );
+  await setUrls(plan.map((p) => [p.id, p.back]));
+  void recheck(plan.map((p) => p.id));
+  return plan.length;
+}
+
+/** Accepts fixes for good: they leave the "fixed" list. */
+export async function keepFixes(ids: string[]) {
+  return mutate(ids, (r, clock) => setFields(r, { prevUrl: '', prevKind: '' }, clock));
+}
+
+/** Checks the given bookmarks again in the background (when pages may be read). */
+async function recheck(ids: string[]) {
+  if (await hasAllUrls()) void enrich(ids, true).catch(() => undefined);
+}
+
+async function setUrls(changes: [string, string][]) {
+  for (const [id, url] of changes) {
+    try {
+      await browser.bookmarks.update(await nativeIdOf(id), { url });
+    } catch {
+      // not in this browser
+    }
+  }
+  await sync({ localOnly: true });
 }
 
 /** "Refresh info" for one bookmark; waits for the result. */

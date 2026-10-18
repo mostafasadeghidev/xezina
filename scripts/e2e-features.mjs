@@ -182,6 +182,17 @@ try {
   assert((await page.locator(`[data-bm="${fonts.id}"].xz-flash`).count()) === 1, 'the bookmark is pointed out');
   assert(!page.url().includes('focus='), 'the address is cleaned up afterwards');
 
+  console.log('8. Shift+click selects a range in the library');
+  await page.goto('about:blank');
+  await page.goto(url('manager.html', '#/library/all'));
+  await page.waitForSelector('h1');
+  await sleep(500);
+  const checks = page.locator('button[aria-label=select]');
+  await checks.nth(0).click({ force: true });
+  await checks.nth(3).click({ force: true, modifiers: ['Shift'] });
+  assert((await page.getByText('4 selected').count()) === 1, 'click the first, Shift+click the fourth → 4 selected');
+  await page.keyboard.press('Escape');
+
   console.log('5. no new tab override');
   const manifest = await sw.evaluate(() => chrome.runtime.getManifest());
   assert(!manifest.chrome_url_overrides, 'the browser keeps its own new tab page');
