@@ -269,4 +269,7 @@ export const it: Strings = {
   viewTiles: "Riquadri",
   viewCompact: "Elenco compatto",
   cardSize: "Dimensione",
+  omniboxLabel: "Cerca dalla barra degli indirizzi",
+  omniboxHint: "Fai clic sulla barra degli indirizzi, digita bm e premi Spazio; poi scrivi cosa cerchi e scegli un segnalibro.",
+  omniboxTip: "Suggerimento: nella barra degli indirizzi digita bm + Spazio per cercare anche lì.",
 };

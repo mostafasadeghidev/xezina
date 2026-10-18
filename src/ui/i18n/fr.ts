@@ -269,4 +269,7 @@ export const fr: Strings = {
   viewTiles: "Vignettes",
   viewCompact: "Liste compacte",
   cardSize: "Taille",
+  omniboxLabel: "Rechercher depuis la barre d’adresse",
+  omniboxHint: "Cliquez dans la barre d’adresse, tapez bm puis Espace ; tapez ensuite ce que vous cherchez et choisissez un favori.",
+  omniboxTip: "Astuce : dans la barre d’adresse, tapez bm + Espace pour chercher aussi.",
 };

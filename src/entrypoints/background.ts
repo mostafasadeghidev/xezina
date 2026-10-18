@@ -210,7 +210,13 @@ export default defineBackground(() => {
     };
     return index;
   };
-  browser.omnibox?.setDefaultSuggestion({ description: 'Xezina — search your bookmarks' });
+  // The hint the address bar shows after "bm ", in the user's language.
+  void (async () => {
+    const { getSettings } = await import('../lib/settings');
+    const { makeI18n, resolveLang } = await import('../ui/i18n');
+    const { t } = makeI18n(resolveLang((await getSettings()).lang));
+    browser.omnibox?.setDefaultSuggestion({ description: `Xezina — ${t('popupSearch')}` });
+  })();
   browser.omnibox?.onInputChanged.addListener(async (text, suggest) => {
     const hits = (await getIndex()).search(text);
     suggest(

@@ -206,9 +206,12 @@ function Bookmarking() {
               </kbd>
             </dd>
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <dt>{t('popupSearch').replace('…', '')}</dt>
-            <dd>
+          <div className="flex items-start justify-between gap-4">
+            <dt>
+              {t('omniboxLabel')}
+              <span className="mt-0.5 block text-xs leading-relaxed text-muted">{t('omniboxHint')}</span>
+            </dt>
+            <dd className="shrink-0">
               <kbd className="rounded-md border border-line bg-hover px-2 py-0.5 text-xs" dir="ltr">
                 bm + Space
               </kbd>

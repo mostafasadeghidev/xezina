@@ -160,8 +160,9 @@ export function QuickSearch({
         ) : (
           <p className="p-10 text-center text-sm text-muted">{t('noResults')}</p>
         )}
-        <div className="border-t border-line px-4 py-2 text-center text-[11px] text-muted" dir="ltr">
-          {t('homeKeys')}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line px-4 py-2 text-[11px] text-muted">
+          <span dir="ltr">{t('homeKeys')}</span>
+          <span>{t('omniboxTip')}</span>
         </div>
       </div>
     </div>

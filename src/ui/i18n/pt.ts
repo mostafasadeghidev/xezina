@@ -269,4 +269,7 @@ export const pt: Strings = {
   viewTiles: "Blocos",
   viewCompact: "Lista compacta",
   cardSize: "Tamanho",
+  omniboxLabel: "Buscar pela barra de endereços",
+  omniboxHint: "Clique na barra de endereços, digite bm e aperte Espaço; depois digite o que procura e escolha um favorito.",
+  omniboxTip: "Dica: na barra de endereços, digite bm + Espaço para buscar também.",
 };

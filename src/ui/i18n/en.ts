@@ -268,6 +268,9 @@ export const en = {
   viewTiles: "Tiles",
   viewCompact: "Compact list",
   cardSize: "Size",
+  omniboxLabel: "Search from the address bar",
+  omniboxHint: "Click the browser’s address bar, type bm and press Space; then type what you are looking for and pick a bookmark.",
+  omniboxTip: "Tip: in the address bar, type bm + Space to search here too.",
 };
 
 export type Strings = typeof en;

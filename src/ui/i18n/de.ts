@@ -269,4 +269,7 @@ export const de: Strings = {
   viewTiles: "Kacheln",
   viewCompact: "Kompakte Liste",
   cardSize: "Größe",
+  omniboxLabel: "Suche in der Adressleiste",
+  omniboxHint: "In die Adressleiste klicken, bm eingeben und die Leertaste drücken; dann den Suchbegriff eingeben und ein Lesezeichen wählen.",
+  omniboxTip: "Tipp: In der Adressleiste bm + Leertaste eingeben, um auch dort zu suchen.",
 };
