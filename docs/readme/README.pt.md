@@ -35,6 +35,9 @@ O Xezina resolve as duas coisas:
 | 🔄 **Sincronização bidirecional de verdade** | Alterações feitas ao mesmo tempo em navegadores diferentes são mescladas campo a campo. Uma renomeação em um navegador e uma movimentação em outro são ambas preservadas. |
 | ☁️ **Armazenamento à sua escolha** | Google Drive, Dropbox, OneDrive, WebDAV/Nextcloud, S3/Cloudflare R2 ou um repositório privado no GitHub. |
 | 🔎 **Pesquise em tudo** | Títulos, endereços, suas notas, tags, nomes de pastas e descrições de páginas. Tolera erros de digitação e entende variantes de letras persas/árabes. Use os filtros `#tag` e `site:example.com`, ou digite `bm` + espaço na barra de endereços. |
+| 🏠 **Início e nova guia** | Busca no estilo Spotlight com sugestões ao vivo e uma prévia de cada resultado. Também pode ser sua página de nova guia. |
+| ⭐ **Funciona com a estrela do navegador** | Salve com a estrela ou Ctrl+D como sempre: o Xezina adiciona uma captura e a descrição da página e depois deixa você adicionar notas. Ou pressione <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. |
+| 🏷️ **Títulos curtos continuam curtos** | Mantenha um título de uma letra (ou nenhum) na barra de favoritos; o Xezina mostra um nome de exibição e o título real da página, e encontra o favorito pelos dois. |
 | 📝 **Notas e tags** | Escreva por que você salvou uma página e adicione tags. Notas e tags são sincronizadas junto com o favorito. |
 | 🖼️ **Prévias** | A imagem de prévia do próprio site, ou uma captura de tela feita quando você visita uma página salva nos favoritos. |
 | 🧹 **Ferramentas de limpeza** | Encontre duplicados e links quebrados. Mova, marque com tags ou exclua muitos favoritos de uma vez, ou arraste-os para uma pasta. |

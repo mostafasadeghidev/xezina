@@ -5,7 +5,7 @@ import { buildTree } from '../core/tree';
 import { ROOT_IDS, type FieldName, type State } from '../core/types';
 import type { DeviceData } from './local';
 
-const META_FIELDS: FieldName[] = ['notes', 'tags', 'fav', 'desc', 'img', 'imgSrc', 'status', 'checkedAt'];
+const META_FIELDS: FieldName[] = ['notes', 'tags', 'fav', 'label', 'desc', 'siteTitle', 'img', 'imgSrc', 'status', 'checkedAt'];
 
 function empty(v: unknown): boolean {
   return v === undefined || v === '' || v === false || v === 0 || (Array.isArray(v) && v.length === 0);

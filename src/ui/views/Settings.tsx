@@ -13,6 +13,8 @@ import {
   RotateCcw,
   Server,
   ShieldCheck,
+  Star,
+  Keyboard,
   Upload,
 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -67,7 +69,12 @@ export function SettingsView({ tab, go, lib }: { tab: string; go: (r: string) =>
           ))}
         </div>
         <div className="mt-6 space-y-6">
-          {current === 'general' && <General />}
+          {current === 'general' && (
+            <>
+              <General />
+              <Bookmarking />
+            </>
+          )}
           {current === 'sync' && <SyncTab />}
           {current === 'previews' && <PreviewsTab />}
           {current === 'backups' && <BackupsTab lib={lib} />}
@@ -145,6 +152,83 @@ function General() {
         </Field>
       </div>
     </Section>
+  );
+}
+
+function Bookmarking() {
+  const { t } = useI18n();
+  const [s, update] = useSettings();
+  const [keys, setKeys] = useState<{ name?: string; shortcut?: string }[]>([]);
+  useEffect(() => {
+    void browser.commands?.getAll().then(setKeys).catch(() => undefined);
+  }, []);
+  const key = (name: string) => keys.find((k) => k.name === name)?.shortcut || '—';
+  const saveCmd = keys.some((k) => k.name === '_execute_browser_action') ? '_execute_browser_action' : '_execute_action';
+  const isFirefox = import.meta.env.FIREFOX;
+  const isEdge = /Edg\//.test(navigator.userAgent);
+  return (
+    <>
+      <Section title={t('bookmarkingTitle')} icon={<Star className="size-4" />}>
+        <div className="space-y-5">
+          <fieldset className="space-y-2">
+            <legend className="text-[13px] font-medium">{t('starTitle')}</legend>
+            <p className="text-xs leading-relaxed text-muted">{t('starHint')}</p>
+            {(['popup', 'notify', 'none'] as const).map((v) => (
+              <label key={v} className="flex cursor-pointer items-center gap-2.5 text-sm">
+                <input
+                  type="radio"
+                  name="afterStar"
+                  checked={s.afterStar === v}
+                  onChange={() => void update({ afterStar: v })}
+                  className="size-4 accent-[var(--accent)]"
+                />
+                {t(v === 'popup' ? 'starPopup' : v === 'notify' ? 'starNotify' : 'starNone')}
+              </label>
+            ))}
+          </fieldset>
+          <div className="border-t border-line pt-5">
+            <Switch checked={s.newTab} onChange={(v) => void update({ newTab: v })} label={t('newTab')} hint={t('newTabHint')} />
+          </div>
+        </div>
+      </Section>
+      <Section title={t('shortcutsTitle')} icon={<Keyboard className="size-4" />}>
+        <dl className="space-y-2.5 text-sm">
+          <div className="flex items-center justify-between gap-4">
+            <dt>{t('shortcutSave')}</dt>
+            <dd>
+              <kbd className="rounded-md border border-line bg-hover px-2 py-0.5 text-xs" dir="ltr">
+                {key(saveCmd)}
+              </kbd>
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <dt>{t('shortcutManager')}</dt>
+            <dd>
+              <kbd className="rounded-md border border-line bg-hover px-2 py-0.5 text-xs" dir="ltr">
+                {key('open-manager')}
+              </kbd>
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <dt>{t('popupSearch').replace('…', '')}</dt>
+            <dd>
+              <kbd className="rounded-md border border-line bg-hover px-2 py-0.5 text-xs" dir="ltr">
+                bm + Space
+              </kbd>
+            </dd>
+          </div>
+        </dl>
+        {!isFirefox && (
+          <Button
+            size="sm"
+            className="mt-4"
+            onClick={() => void browser.tabs.create({ url: isEdge ? 'edge://extensions/shortcuts' : 'chrome://extensions/shortcuts' })}
+          >
+            {t('shortcutsChange')}
+          </Button>
+        )}
+      </Section>
+    </>
   );
 }
 

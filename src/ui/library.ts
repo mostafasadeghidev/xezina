@@ -1,4 +1,4 @@
-import { hostOf, normalizeUrl } from '../core/normalize';
+import { displayTitle, hostOf, normalizeUrl } from '../core/normalize';
 import { searchIds } from '../core/search';
 import type { TreeNode } from '../core/tree';
 import { linkHealth } from '../enrich/metadata';
@@ -16,8 +16,9 @@ export type Filter =
 
 export type Sort = 'manual' | 'newest' | 'oldest' | 'title' | 'site';
 
-export function parseRoute(route: string): { page: 'library' | 'dashboard' | 'settings'; filter: Filter; tab?: string } {
+export function parseRoute(route: string): { page: 'home' | 'library' | 'dashboard' | 'settings'; filter: Filter; tab?: string } {
   const [, page, a, b] = route.split('/');
+  if (!page || page === 'home') return { page: 'home', filter: { kind: 'all' } };
   if (page === 'dashboard') return { page: 'dashboard', filter: { kind: 'all' } };
   if (page === 'settings') return { page: 'settings', filter: { kind: 'all' }, tab: a || 'general' };
   if (page === 'folder' && a) return { page: 'library', filter: { kind: 'folder', id: decodeURIComponent(a) } };
@@ -102,7 +103,7 @@ export function select(lib: Library, filter: Filter, query: string, sort: Sort):
       sorted.sort((a, b) => added(a) - added(b));
       break;
     case 'title':
-      sorted.sort((a, b) => a.title.localeCompare(b.title));
+      sorted.sort((a, b) => displayTitle(a.title, a.url, a.rec.v).localeCompare(displayTitle(b.title, b.url, b.rec.v)));
       break;
     case 'site':
       sorted.sort((a, b) => hostOf(a.url).localeCompare(hostOf(b.url)) || a.title.localeCompare(b.title));
@@ -124,4 +125,32 @@ function descendants(n: TreeNode | undefined): TreeNode[] {
   };
   if (n) walk(n);
   return out;
+}
+
+/**
+ * Which copy of a duplicated bookmark to keep: the one with notes/tags/favorite,
+ * then the one in the bookmarks bar, then the oldest.
+ */
+export function pickKeeper(lib: Library, ids: string[]): string {
+  const inToolbar = (id: string) => {
+    let p = lib.tree.byId.get(id)?.parent;
+    const seen = new Set<string>();
+    while (p && !seen.has(p)) {
+      if (p === 'root_toolbar') return true;
+      seen.add(p);
+      p = lib.tree.byId.get(p)?.parent;
+    }
+    return false;
+  };
+  const score = (id: string) => {
+    const v = lib.tree.byId.get(id)?.rec.v ?? {};
+    return (v.notes ? 4 : 0) + ((v.tags ?? []).length ? 4 : 0) + (v.label ? 2 : 0) + (v.fav ? 2 : 0) + (inToolbar(id) ? 1 : 0);
+  };
+  return [...ids].sort((a, b) => {
+    const d = score(b) - score(a);
+    if (d) return d;
+    const ta = lib.tree.byId.get(a)?.rec.v.addedAt ?? Infinity;
+    const tb = lib.tree.byId.get(b)?.rec.v.addedAt ?? Infinity;
+    return ta - tb || (a < b ? -1 : 1);
+  })[0];
 }

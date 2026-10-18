@@ -1,7 +1,7 @@
 import { BookmarkPlus, Camera, ExternalLink, LayoutDashboard, Search, Star, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
-import { hostOf, normalizeUrl } from '../../core/normalize';
+import { displayTitle, hostOf, normalizeUrl } from '../../core/normalize';
 import { searchIds } from '../../core/search';
 import { ROOT } from '../../core/types';
 import { send } from '../../lib/messages';
@@ -156,7 +156,7 @@ function Popup({ remote }: { remote: boolean }) {
             <a key={h.id} href={h.url} target="_blank" rel="noreferrer" className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 hover:bg-hover">
               <Favicon url={h.url} remote={remote} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium">{h.title || hostOf(h.url)}</span>
+                <span className="block truncate text-[13px] font-medium">{displayTitle(h.title, h.url, h.rec.v)}</span>
                 <span className="block truncate text-[11px] text-muted">{h.rec.v.notes || hostOf(h.url)}</span>
               </span>
             </a>

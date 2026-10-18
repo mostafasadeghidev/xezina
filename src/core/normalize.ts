@@ -63,3 +63,8 @@ export function uniqueTags(tags: string[]): string[] {
   for (const t of tags.map(cleanTag)) if (t && !out.includes(t)) out.push(t);
   return out;
 }
+
+/** What Xezina shows for a bookmark: display name → browser title → page title → site. */
+export function displayTitle(title: string, url: string, v: { label?: string; siteTitle?: string }): string {
+  return (v.label || title || v.siteTitle || hostOf(url) || url).trim();
+}

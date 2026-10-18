@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { buildTree } from '../core/tree';
+import { displayTitle } from '../core/normalize';
 import { buildIndex, searchIds } from '../core/search';
 import type { State } from '../core/types';
 import { db } from '../db/db';
@@ -17,6 +18,9 @@ import {
   githubFinish,
   githubStart,
   maybeAutoCapture,
+  onBrowserBookmarked,
+  onNotificationClicked,
+  setImporting,
   moveNative,
   onBookmarkEvent,
   removeNative,
@@ -111,6 +115,13 @@ export default defineBackground(() => {
     return true;
   });
 
+  browser.bookmarks.onCreated.addListener((id, node) => {
+    if (node.url) void onBrowserBookmarked(id, node.url).catch(() => undefined);
+  });
+  browser.notifications?.onClicked.addListener(onNotificationClicked);
+  browser.bookmarks.onImportBegan?.addListener(() => setImporting(true));
+  browser.bookmarks.onImportEnded?.addListener(() => setImporting(false));
+
   for (const ev of [
     browser.bookmarks.onCreated,
     browser.bookmarks.onRemoved,
@@ -158,7 +169,7 @@ export default defineBackground(() => {
       search: (q) =>
         searchIds(mini, q, 8).map((id) => {
           const n = tree.byId.get(id)!;
-          return { id, title: n.title, url: n.url };
+          return { id, title: displayTitle(n.title, n.url, n.rec.v), url: n.url };
         }),
     };
     return index;

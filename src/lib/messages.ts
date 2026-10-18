@@ -8,7 +8,7 @@ import type { DeviceCode } from '../storage/github';
 export type Message =
   | { type: 'sync'; mode?: SyncMode; allowMassDelete?: boolean }
   | { type: 'scan' }
-  | { type: 'meta'; ids: string[]; patch: Partial<Pick<FieldValues, 'notes' | 'tags' | 'fav'>> }
+  | { type: 'meta'; ids: string[]; patch: Partial<Pick<FieldValues, 'notes' | 'tags' | 'fav' | 'label'>> }
   | { type: 'tags'; ids: string[]; add?: string[]; remove?: string[] }
   | { type: 'edit'; id: string; title?: string; url?: string }
   | { type: 'move'; ids: string[]; parent: string; index?: number }

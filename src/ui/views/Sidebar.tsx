@@ -8,6 +8,7 @@ import {
   FolderOpen,
   FolderPlus,
   Hash,
+  Home,
   LayoutDashboard,
   Settings as SettingsIcon,
   Star,
@@ -186,6 +187,7 @@ export function Sidebar({
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+        <Item icon={<Home className="size-4" />} label={t('navHome')} active={page === 'home'} onClick={() => go('/home')} />
         <Item icon={<Bookmark className="size-4" />} label={t('navAll')} count={lib.bookmarks.length} active={is('all')} onClick={() => go('/library/all')} />
         <Item
           icon={<Star className="size-4" />}

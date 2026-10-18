@@ -17,6 +17,7 @@ export default defineConfig({
       'alarms',
       'identity',
       'activeTab',
+      'notifications',
       ...(browser === 'firefox' ? [] : ['favicon']),
     ],
     // Requested at runtime only when the user enables previews, link checks or a remote storage.
@@ -33,6 +34,10 @@ export default defineConfig({
     ],
     omnibox: { keyword: 'bm' },
     commands: {
+      [browser === 'firefox' ? '_execute_browser_action' : '_execute_action']: {
+        suggested_key: { default: 'Alt+Shift+S' },
+        description: 'Save the current page with notes',
+      },
       'open-manager': {
         suggested_key: { default: 'Alt+Shift+B' },
         description: 'Open the bookmark manager',

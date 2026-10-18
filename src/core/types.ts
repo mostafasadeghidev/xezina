@@ -22,6 +22,10 @@ export interface FieldValues {
   url: string;
   /** User notes. */
   notes: string;
+  /** Name shown inside Xezina only; the browser keeps `title` as the user set it. */
+  label: string;
+  /** Title found on the page itself (never written to the browser). */
+  siteTitle: string;
   tags: string[];
   fav: boolean;
   /** Tombstone. */

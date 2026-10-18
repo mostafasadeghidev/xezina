@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
-import { hostOf } from '../../core/normalize';
+import { displayTitle, hostOf } from '../../core/normalize';
 import { pathOf, type TreeNode } from '../../core/tree';
 import { isRoot, ROOT } from '../../core/types';
 import { linkHealth } from '../../enrich/metadata';
@@ -28,6 +28,7 @@ import { useStatus, type Library as Lib } from '../hooks';
 import { useI18n } from '../i18n';
 import { routeOf, select, type Filter, type Sort } from '../library';
 import { DRAG_TYPE } from './Sidebar';
+import { Duplicates } from './Duplicates';
 
 function loadPref<T>(key: string, fallback: T): T {
   try {
@@ -251,7 +252,9 @@ export function LibraryView({
             </div>
           )}
 
-          {items.length === 0 ? (
+          {filter.kind === 'dups' && !query.trim() && items.length > 0 ? (
+            <Duplicates lib={lib} selected={selected} setSelected={setSelected} openDetails={openDetails} remote={remote} />
+          ) : items.length === 0 ? (
             query ? (
               <Empty icon={<SearchX className="size-6" />} title={t('noResults')} hint={t('noResultsHint')}>
                 {filter.kind !== 'all' && (
@@ -454,7 +457,7 @@ function CardItem({
       <div className="flex min-h-0 flex-1 cursor-pointer flex-col gap-1.5 p-3" onClick={onOpen}>
         <div className="flex items-start gap-2">
           <Favicon url={node.url} remote={remote} />
-          <h3 dir="auto" className="line-clamp-2 min-w-0 flex-1 text-start text-[13.5px] font-semibold leading-snug">{node.title || hostOf(node.url)}</h3>
+          <h3 dir="auto" className="line-clamp-2 min-w-0 flex-1 text-start text-[13.5px] font-semibold leading-snug">{displayTitle(node.title, node.url, v)}</h3>
           <HealthDot node={node} />
         </div>
         <div className="ltr truncate text-start text-xs text-muted">{hostOf(node.url)}</div>
@@ -515,7 +518,7 @@ function Row({
       <Favicon url={node.url} remote={remote} />
       <button onClick={onOpen} className="min-w-0 flex-1 text-start">
         <div className="flex items-center gap-2">
-          <span dir="auto" className="truncate text-[13.5px] font-medium">{node.title || hostOf(node.url)}</span>
+          <span dir="auto" className="truncate text-[13.5px] font-medium">{displayTitle(node.title, node.url, v)}</span>
           {v.fav && <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />}
           <HealthDot node={node} />
         </div>

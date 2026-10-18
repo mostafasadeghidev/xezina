@@ -138,9 +138,9 @@ export function faviconUrl(pageUrl: string, allowRemote: boolean): string | unde
 }
 
 export function useHashRoute(): [string, (r: string) => void] {
-  const [route, setRoute] = useState(() => location.hash.slice(1) || '/library/all');
+  const [route, setRoute] = useState(() => location.hash.slice(1) || '/home');
   useEffect(() => {
-    const on = () => setRoute(location.hash.slice(1) || '/library/all');
+    const on = () => setRoute(location.hash.slice(1) || '/home');
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);

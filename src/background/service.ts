@@ -242,7 +242,14 @@ export async function moveNative(ids: string[], parent: string, index?: number) 
   await sync({ localOnly: true });
 }
 
+/** Addresses Xezina is bookmarking itself, so its own creations are not mistaken for the browser's star. */
+export const ownCreates = new Set<string>();
+
 export async function createNative(parent: string, title: string, url?: string, index?: number): Promise<string | null> {
+  if (url) {
+    ownCreates.add(url);
+    setTimeout(() => ownCreates.delete(url), 5000);
+  }
   const node = await browser.bookmarks.create({ parentId: await nativeIdOf(parent), title, url, index });
   await sync({ localOnly: true });
   const meta = await kvGet<Omit<DeviceData, 'state'> | null>('device', null);
@@ -261,7 +268,7 @@ export async function removeNative(ids: string[]) {
   await sync({ localOnly: true });
 }
 
-export async function setMeta(ids: string[], patch: Partial<Pick<FieldValues, 'notes' | 'tags' | 'fav'>>) {
+export async function setMeta(ids: string[], patch: Partial<Pick<FieldValues, 'notes' | 'tags' | 'fav' | 'label'>>) {
   const clean = { ...patch };
   if (clean.tags) clean.tags = uniqueTags(clean.tags);
   return mutate(ids, (rec, clock) => setFields(rec, clean, clock));
@@ -397,8 +404,8 @@ async function enrichOne(rec: Rec, s: Settings) {
       patch.img = img;
       patch.imgSrc = 'og';
     }
-    // Keep the user's title unless it is just the URL.
-    if (info.title && (!r.v.title || r.v.title === r.v.url)) patch.title = info.title;
+    // The browser title stays exactly as the user set it (even empty); the page title is kept aside.
+    if (info.title && info.title !== r.v.siteTitle) patch.siteTitle = info.title;
     const changed = setFields(r, patch, clock);
     return changed;
   });
@@ -601,3 +608,85 @@ export async function restoreBackup(id: number) {
   scheduleRemoteSync(1_000);
 }
 
+
+// ---------------------------------------------------------------- the browser's star
+
+/** Record id for a native bookmark id (after a local scan). */
+async function recordIdOf(nativeId: string): Promise<string | null> {
+  const meta = await kvGet<Omit<DeviceData, 'state'> | null>('device', null);
+  return Object.entries(meta?.map ?? {}).find(([, nid]) => nid === nativeId)?.[0] ?? null;
+}
+
+/**
+ * Someone bookmarked the page they are looking at with the browser's own star
+ * (or Ctrl+D): capture it, fetch its description, and offer to add notes.
+ */
+export let importing = false;
+export function setImporting(v: boolean) {
+  importing = v;
+}
+const recentCreates: number[] = [];
+
+export async function onBrowserBookmarked(nativeId: string, url: string) {
+  if (applying || importing || ownCreates.has(url)) return;
+  const now = Date.now();
+  recentCreates.push(now);
+  while (recentCreates.length && now - recentCreates[0] > 2000) recentCreates.shift();
+  const s = await getSettings();
+  if (s.afterStar === 'none' && !s.previews.autoCapture) return;
+  const access = await hasAllUrls();
+  const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
+  if (access) {
+    // With page access we can be sure it was the page in front of the user.
+    if (!tab?.url || normalizeUrl(tab.url) !== normalizeUrl(url)) return;
+  } else {
+    // Without it, only react to a single bookmark (not a paste or drag of many).
+    await new Promise((r) => setTimeout(r, 1200));
+    if (recentCreates.some((t) => t !== now && Math.abs(t - now) < 1500)) return;
+  }
+  await new Promise((r) => setTimeout(r, 400));
+  await sync({ localOnly: true }).catch(() => undefined);
+  const id = await recordIdOf(nativeId);
+  if (!id) return;
+  if (access && s.previews.autoCapture && tab?.windowId !== undefined) {
+    await capture(tab.windowId, id).catch(() => undefined);
+  }
+  if (access) void enrich([id]).catch(() => undefined);
+  scheduleRemoteSync();
+
+  // The popup needs to know the page's address, which needs page access.
+  if (s.afterStar === 'popup' && access) {
+    try {
+      // Give the browser's own bookmark bubble a moment to close.
+      await new Promise((r) => setTimeout(r, 700));
+      await (browser.action ?? (browser as unknown as { browserAction: typeof browser.action }).browserAction).openPopup();
+      return;
+    } catch {
+      // Not allowed here (older browser, no focused window…): fall back to a notification.
+    }
+  }
+  if (s.afterStar !== 'none') await notifySaved(id);
+}
+
+async function notifySaved(id: string) {
+  const { makeI18n, resolveLang } = await import('../ui/i18n');
+  const s = await getSettings();
+  const { t } = makeI18n(resolveLang(s.lang));
+  try {
+    await browser.notifications.create(`xz-saved:${id}`, {
+      type: 'basic',
+      iconUrl: browser.runtime.getURL('/icon/128.png'),
+      title: t('starSavedTitle'),
+      message: t('starSavedBody'),
+    });
+  } catch {
+    // notifications blocked
+  }
+}
+
+export function onNotificationClicked(notificationId: string) {
+  if (!notificationId.startsWith('xz-saved:')) return;
+  const id = notificationId.slice('xz-saved:'.length);
+  void browser.tabs.create({ url: browser.runtime.getURL('/manager.html') + `#/home?edit=${encodeURIComponent(id)}` });
+  void browser.notifications.clear(notificationId);
+}

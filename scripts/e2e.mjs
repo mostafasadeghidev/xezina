@@ -114,7 +114,7 @@ try {
   await seed(B.sw, { bar: ['https://github.com'], other: ['https://wikipedia.org'] });
 
   const pa = await A.ctx.newPage();
-  await pa.goto(`chrome-extension://${A.id}/manager.html`);
+  await pa.goto(`chrome-extension://${A.id}/manager.html#/library/all`);
   await pa.waitForSelector('text=All bookmarks', { timeout: 15000 });
   await sleep(1500);
   const countA = await pa.locator('h1').first().textContent();
@@ -151,7 +151,7 @@ try {
   await msg(pa, { type: 'sync' });
 
   const pb = await B.ctx.newPage();
-  await pb.goto(`chrome-extension://${B.id}/manager.html`);
+  await pb.goto(`chrome-extension://${B.id}/manager.html#/library/all`);
   await pb.waitForSelector('text=All bookmarks', { timeout: 15000 });
   await msg(pb, { type: 'remote:set', config: cfg });
   await sleep(500);
@@ -194,7 +194,8 @@ try {
   await pa.evaluate(() =>
     chrome.storage.local.get('settings').then(({ settings }) => chrome.storage.local.set({ settings: { ...settings, lang: 'fa', theme: 'dark' } })),
   );
-  await pa.reload();
+  await pa.goto('about:blank');
+  await pa.goto(`chrome-extension://${A.id}/manager.html#/library/all`);
   await pa.waitForSelector('text=همهٔ بوکمارک‌ها', { timeout: 15000 }).catch(() => undefined);
   await sleep(1200);
   await pa.screenshot({ path: path.join(SHOTS, '02-library-fa-dark.png') });

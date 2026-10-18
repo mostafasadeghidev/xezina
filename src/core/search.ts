@@ -41,7 +41,7 @@ export function docsFromTree(tree: Tree): SearchDoc[] {
     const v = n.rec.v;
     docs.push({
       id: n.id,
-      title: n.title,
+      title: [v.label, n.title, v.siteTitle].filter(Boolean).join(' '),
       url: n.url.replace(/^https?:\/\/(www\.)?/, '').replace(/[/?#=&._-]+/g, ' '),
       host: hostOf(n.url).replace(/\./g, ' '),
       notes: v.notes ?? '',

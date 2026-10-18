@@ -35,6 +35,9 @@ Xezina löst beides:
 | 🔄 **Echte Zwei-Wege-Synchronisierung** | Änderungen, die gleichzeitig in verschiedenen Browsern vorgenommen werden, werden Feld für Feld zusammengeführt. Eine Umbenennung in einem Browser und eine Verschiebung in einem anderen bleiben beide erhalten. |
 | ☁️ **Speicher Ihrer Wahl** | Google Drive, Dropbox, OneDrive, WebDAV/Nextcloud, S3/Cloudflare R2 oder ein privates GitHub-Repository. |
 | 🔎 **Alles durchsuchen** | Titel, Adressen, Ihre Notizen, Tags, Ordnernamen und Seitenbeschreibungen. Toleriert Tippfehler und versteht persische/arabische Buchstabenvarianten. Nutzen Sie die Filter `#tag` und `site:example.com` oder tippen Sie `bm` + Leertaste in die Adressleiste. |
+| 🏠 **Startseite & neuer Tab** | Suche im Spotlight-Stil mit Live-Vorschlägen und einer Vorschau für jedes Ergebnis. Kann auch Ihre Neuer-Tab-Seite sein. |
+| ⭐ **Funktioniert mit dem Browser-Stern** | Wie gewohnt mit dem Stern oder Strg+D speichern: Xezina ergänzt Screenshot und Seitenbeschreibung und lässt Sie Notizen hinzufügen. Oder <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> drücken. |
+| 🏷️ **Kurze Titel bleiben kurz** | Behalten Sie in der Lesezeichenleiste einen Ein-Buchstaben-Titel (oder keinen); Xezina zeigt einen Anzeigenamen und den echten Seitentitel und findet das Lesezeichen über beide. |
 | 📝 **Notizen & Tags** | Notieren Sie, warum Sie eine Seite gespeichert haben, und versehen Sie sie mit Tags. Notizen und Tags werden mit dem Lesezeichen synchronisiert. |
 | 🖼️ **Vorschauen** | Das eigene Vorschaubild der Website oder ein Screenshot, der beim Besuch einer gespeicherten Seite aufgenommen wird. |
 | 🧹 **Aufräumwerkzeuge** | Duplikate und defekte Links finden. Viele Lesezeichen auf einmal verschieben, taggen oder löschen – oder sie auf einen Ordner ziehen. |

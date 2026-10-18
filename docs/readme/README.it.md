@@ -35,6 +35,9 @@ Xezina risolve entrambi i problemi:
 | 🔄 **Vera sincronizzazione bidirezionale** | Le modifiche fatte contemporaneamente in browser diversi vengono unite campo per campo. Una rinomina in un browser e uno spostamento in un altro vengono mantenuti entrambi. |
 | ☁️ **Lo spazio di archiviazione che preferisci** | Google Drive, Dropbox, OneDrive, WebDAV/Nextcloud, S3/Cloudflare R2 o un repository GitHub privato. |
 | 🔎 **Cerca in tutto** | Titoli, indirizzi, le tue note, tag, nomi delle cartelle e descrizioni delle pagine. Tollera gli errori di battitura e riconosce le varianti delle lettere persiane/arabe. Usa i filtri `#tag` e `site:example.com`, oppure digita `bm` + spazio nella barra degli indirizzi. |
+| 🏠 **Home e nuova scheda** | Ricerca in stile Spotlight con suggerimenti in tempo reale e anteprima di ogni risultato. Può diventare anche la tua pagina Nuova scheda. |
+| ⭐ **Funziona con la stella del browser** | Salva con la stella o Ctrl+D come sempre: Xezina aggiunge uno screenshot e la descrizione della pagina, poi ti fa aggiungere note. Oppure premi <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. |
+| 🏷️ **I titoli brevi restano brevi** | Tieni un titolo di una lettera (o vuoto) nella barra dei segnalibri; Xezina mostra un nome visualizzato e il vero titolo della pagina, e lo trova con entrambi. |
 | 📝 **Note e tag** | Scrivi perché hai salvato una pagina e aggiungi dei tag. Note e tag si sincronizzano insieme al segnalibro. |
 | 🖼️ **Anteprime** | L’immagine di anteprima del sito stesso, oppure uno screenshot acquisito quando visiti una pagina salvata nei segnalibri. |
 | 🧹 **Strumenti di pulizia** | Trova duplicati e link non funzionanti. Sposta, tagga o elimina molti segnalibri in una volta, oppure trascinali su una cartella. |

@@ -5,6 +5,7 @@ import { useHashRoute, useLibrary, useRecords, useSettings, useTheme } from '../
 import { I18nProvider, LANGUAGES, resolveLang } from '../i18n';
 import { parseRoute } from '../library';
 import { Dashboard } from './Dashboard';
+import { Home } from './Home';
 import { AddDialog, Details, FolderDialog } from './Details';
 import { LibraryView } from './Library';
 import { SettingsView } from './Settings';
@@ -36,7 +37,8 @@ function Shell({ remote }: { remote: boolean }) {
   const records = useRecords();
   const lib = useLibrary(records);
   const [route, go] = useHashRoute();
-  const { page, filter, tab } = parseRoute(route.split('?')[0]);
+  const [path, search] = route.split('?');
+  const { page, filter, tab } = parseRoute(path);
   const [query, setQuery] = useState(() => new URLSearchParams(location.hash.split('#q=')[1] ? `q=${location.hash.split('#q=')[1]}` : '').get('q') ?? '');
   const [details, setDetails] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -49,6 +51,16 @@ function Shell({ remote }: { remote: boolean }) {
     void send({ type: 'scan' }).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // "#/home?edit=<id>" (from a notification) opens that bookmark's details.
+  useEffect(() => {
+    const id = new URLSearchParams(search ?? '').get('edit');
+    if (id) {
+      setDetails(id);
+      go(path);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const goAndReset = useCallback(
     (r: string) => {
@@ -69,6 +81,17 @@ function Shell({ remote }: { remote: boolean }) {
     <div className="flex h-screen overflow-hidden">
       <Sidebar lib={lib} filter={filter} page={page} go={goAndReset} onNewFolder={setNewFolderIn} />
       <main className="min-w-0 flex-1">
+        {page === 'home' && (
+          <Home
+            lib={lib}
+            openDetails={setDetails}
+            remote={remote}
+            showAll={(q) => {
+              setQuery(q);
+              go('/library/all');
+            }}
+          />
+        )}
         {page === 'library' && (
           <LibraryView
             lib={lib}

@@ -17,6 +17,7 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [label, setLabel] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [parent, setParent] = useState('');
   const [busy, setBusy] = useState(false);
@@ -27,6 +28,7 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
     setTitle(node.title);
     setUrl(node.url);
     setNotes(node.rec.v.notes ?? '');
+    setLabel(node.rec.v.label ?? '');
     setTags(node.rec.v.tags ?? []);
     setParent(node.parent);
     // Reset only when switching to another bookmark.
@@ -46,6 +48,7 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
     title !== node.title ||
     url !== node.url ||
     notes !== (v.notes ?? '') ||
+    label !== (v.label ?? '') ||
     parent !== node.parent ||
     JSON.stringify(tags) !== JSON.stringify(v.tags ?? []);
 
@@ -53,8 +56,8 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
     setBusy(true);
     try {
       if (title !== node.title || url !== node.url) await send({ type: 'edit', id, title, url: url !== node.url ? url : undefined });
-      if (notes !== (v.notes ?? '') || JSON.stringify(tags) !== JSON.stringify(v.tags ?? []))
-        await send({ type: 'meta', ids: [id], patch: { notes, tags } });
+      if (notes !== (v.notes ?? '') || label !== (v.label ?? '') || JSON.stringify(tags) !== JSON.stringify(v.tags ?? []))
+        await send({ type: 'meta', ids: [id], patch: { notes, tags, label: label.trim() } });
       if (parent !== node.parent) await send({ type: 'move', ids: [id], parent });
       toast(t('saved'));
     } catch (e) {
@@ -142,8 +145,11 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
             <ArrowUpRight className="size-4 shrink-0" />
           </a>
 
-          <Field label={t('title')}>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Field label={t('title')} hint={t('titleBrowserHint')}>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} dir="auto" />
+          </Field>
+          <Field label={t('displayName')} hint={t('displayNameHint')}>
+            <Input value={label} onChange={(e) => setLabel(e.target.value)} dir="auto" placeholder={v.siteTitle || ''} />
           </Field>
           <Field label={t('url')}>
             <Input value={url} onChange={(e) => setUrl(e.target.value)} dir="ltr" />
@@ -158,10 +164,20 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
             <TagInput value={tags} onChange={setTags} suggestions={lib.tags.map(([x]) => x)} placeholder={t('tagsPlaceholder')} />
           </Field>
 
-          {v.desc && (
-            <div className="rounded-xl bg-hover p-3">
-              <div className="mb-1 text-xs font-medium text-muted">{t('siteDescription')}</div>
-              <p className="text-[13px] leading-relaxed text-fg/80">{v.desc}</p>
+          {(v.desc || v.siteTitle) && (
+            <div className="space-y-2 rounded-xl bg-hover p-3">
+              {v.siteTitle && (
+                <div>
+                  <div className="text-xs font-medium text-muted">{t('siteTitle')}</div>
+                  <p dir="auto" className="text-[13px] font-medium">{v.siteTitle}</p>
+                </div>
+              )}
+              {v.desc && (
+                <div>
+                  <div className="text-xs font-medium text-muted">{t('siteDescription')}</div>
+                  <p dir="auto" className="text-[13px] leading-relaxed text-fg/80">{v.desc}</p>
+                </div>
+              )}
             </div>
           )}
 
