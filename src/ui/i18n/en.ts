@@ -294,7 +294,6 @@ export const en = {
   fixAll: "Fix all ({n})",
   fixAllConfirm: "Change the address of {n} bookmarks to the suggested ones? A backup is made first.",
   archived: "Archived copy",
-  liveLeft: "The site moved to another page inside this box (it may need your login). A separate window shows the real page.",
 };
 
 export type Strings = typeof en;

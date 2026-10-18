@@ -295,5 +295,4 @@ export const pt: Strings = {
   fixAll: "Corrigir todos ({n})",
   fixAllConfirm: "Trocar o endereço de {n} favoritos pelos sugeridos? Um backup é feito antes.",
   archived: "Cópia arquivada",
-  liveLeft: "O site foi para outra página dentro deste quadro (talvez precise do seu login). Uma janela separada mostra a página real.",
 };

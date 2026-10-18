@@ -295,5 +295,4 @@ export const it: Strings = {
   fixAll: "Correggi tutti ({n})",
   fixAllConfirm: "Cambiare l’indirizzo di {n} segnalibri con quelli suggeriti? Prima viene fatto un backup.",
   archived: "Copia archiviata",
-  liveLeft: "Il sito è passato a un’altra pagina in questo riquadro (forse serve l’accesso). Una finestra separata mostra la pagina vera.",
 };

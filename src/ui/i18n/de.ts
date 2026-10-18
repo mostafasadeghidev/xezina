@@ -295,5 +295,4 @@ export const de: Strings = {
   fixAll: "Alle korrigieren ({n})",
   fixAllConfirm: "Die Adresse von {n} Lesezeichen auf die vorgeschlagenen ändern? Vorher wird gesichert.",
   archived: "Archivkopie",
-  liveLeft: "Die Website ist in diesem Rahmen auf eine andere Seite gewechselt (evtl. Anmeldung nötig). Ein eigenes Fenster zeigt die echte Seite.",
 };
