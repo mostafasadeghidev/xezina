@@ -679,15 +679,20 @@ async function noteStarProblem(step: string, e: unknown) {
 async function openToolbarPopup(windowId?: number): Promise<boolean> {
   const action = browser.action ?? (browser as unknown as { browserAction: typeof browser.action }).browserAction;
   if (!action?.openPopup) return false;
-  for (let i = 0; i < 8; i++) {
-    await sleep(i === 0 ? 300 : 700);
+  // Wait up to 20 s for the user to close the browser's bubble (Done / click away).
+  const deadline = Date.now() + 20_000;
+  let last: unknown;
+  await sleep(300);
+  while (Date.now() < deadline) {
     try {
       await (windowId !== undefined ? action.openPopup({ windowId }) : action.openPopup());
       return true;
     } catch (e) {
-      if (i === 7) await noteStarProblem('openPopup', e);
+      last = e;
+      await sleep(400);
     }
   }
+  await noteStarProblem('openPopup', last);
   return false;
 }
 
