@@ -1,6 +1,7 @@
 import {
   ArrowUpRight,
   Bookmark,
+  Camera,
   Check,
   Folder,
   FolderInput,
@@ -515,6 +516,11 @@ function CardItem({
         className="relative block aspect-[16/10] overflow-hidden border-b border-line bg-hover"
       >
         <Preview node={node} remote={remote} />
+        {v.imgSrc === 'shot' && (
+          <span className="absolute bottom-1.5 end-1.5 flex size-5 items-center justify-center rounded-md bg-black/45 text-white backdrop-blur" title={t('hasScreenshot')}>
+            <Camera className="size-3" />
+          </span>
+        )}
       </a>
       <button
         onClick={onSelect}

@@ -123,14 +123,6 @@ function Popup({ remote }: { remote: boolean }) {
     notes !== (existing.rec.v.notes ?? '') ||
     parent !== existing.parent ||
     JSON.stringify(tags) !== JSON.stringify(existing.rec.v.tags ?? []);
-  const siteRoot = (() => {
-    try {
-      const u = new URL(url.trim());
-      return /^https?:$/.test(u.protocol) ? `${u.origin}/` : '';
-    } catch {
-      return '';
-    }
-  })();
   const bookmarkable = !!existing || (!!tab && /^(https?|ftp|file):/i.test(tab.url));
 
   const save = async () => {
@@ -255,9 +247,10 @@ function Popup({ remote }: { remote: boolean }) {
                 >
                   <Star className={cx('size-4', existing.rec.v.fav && 'fill-yellow-400 text-yellow-400')} />
                 </IconButton>
-                {tab && (
+                {tab ? (
                   <IconButton
-                    label={t('popupCapture')}
+                    label={existing.rec.v.imgSrc === 'shot' ? t('hasScreenshot') : t('popupCapture')}
+                    className={cx('relative', existing.rec.v.imgSrc === 'shot' && '!text-ok')}
                     onClick={() =>
                       void send({ type: 'capture', tabId: tab.id, windowId: tab.windowId, id: existing.id })
                         .then(() => toast(t('done')))
@@ -265,7 +258,15 @@ function Popup({ remote }: { remote: boolean }) {
                     }
                   >
                     <Camera className="size-4" />
+                    {existing.rec.v.imgSrc === 'shot' && <span className="absolute end-1 top-1 size-1.5 rounded-full bg-ok" />}
                   </IconButton>
+                ) : (
+                  existing.rec.v.imgSrc === 'shot' && (
+                    <span className="relative flex size-8 items-center justify-center text-ok" title={t('hasScreenshot')}>
+                      <Camera className="size-4" />
+                      <span className="absolute end-1 top-1 size-1.5 rounded-full bg-ok" />
+                    </span>
+                  )
                 )}
                 <IconButton
                   label={t('popupRemove')}
@@ -283,14 +284,7 @@ function Popup({ remote }: { remote: boolean }) {
             )}
           </div>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="!h-9" dir="auto" />
-          <div className="flex gap-1.5">
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} className="!h-9 text-[12.5px]" dir="ltr" spellCheck={false} />
-            {siteRoot && siteRoot !== url.trim() && (
-              <Button size="sm" className="!h-9 shrink-0" onClick={() => setUrl(siteRoot)} title={siteRoot}>
-                {t('siteOnly')}
-              </Button>
-            )}
-          </div>
+          <Input value={url} onChange={(e) => setUrl(e.target.value)} className="!h-9 text-[12.5px]" dir="ltr" spellCheck={false} />
           <FolderSelect tree={lib.tree} value={parent} onChange={setParent} />
           <Textarea
             value={notes}

@@ -272,8 +272,8 @@ export const de: Strings = {
   omniboxLabel: "Suche in der Adressleiste",
   omniboxHint: "In die Adressleiste klicken, bm eingeben und die Leertaste drücken; dann den Suchbegriff eingeben und ein Lesezeichen wählen.",
   omniboxTip: "Tipp: In der Adressleiste bm + Leertaste eingeben, um auch dort zu suchen.",
-  siteOnly: "Nur Website",
   savedState: "Gespeichert",
   saveChanges: "Änderungen speichern",
   withScreenshot: "Screenshot dieser Seite speichern",
+  hasScreenshot: "Hat einen Screenshot – klicken für einen neuen",
 };

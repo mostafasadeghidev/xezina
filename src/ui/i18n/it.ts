@@ -272,8 +272,8 @@ export const it: Strings = {
   omniboxLabel: "Cerca dalla barra degli indirizzi",
   omniboxHint: "Fai clic sulla barra degli indirizzi, digita bm e premi Spazio; poi scrivi cosa cerchi e scegli un segnalibro.",
   omniboxTip: "Suggerimento: nella barra degli indirizzi digita bm + Spazio per cercare anche lì.",
-  siteOnly: "Solo il sito",
   savedState: "Salvato",
   saveChanges: "Salva modifiche",
   withScreenshot: "Salva uno screenshot di questa pagina",
+  hasScreenshot: "Ha uno screenshot — clicca per farne uno nuovo",
 };

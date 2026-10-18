@@ -272,8 +272,8 @@ export const pt: Strings = {
   omniboxLabel: "Buscar pela barra de endereços",
   omniboxHint: "Clique na barra de endereços, digite bm e aperte Espaço; depois digite o que procura e escolha um favorito.",
   omniboxTip: "Dica: na barra de endereços, digite bm + Espaço para buscar também.",
-  siteOnly: "Só o site",
   savedState: "Salvo",
   saveChanges: "Salvar alterações",
   withScreenshot: "Salvar uma captura desta página",
+  hasScreenshot: "Tem uma captura — clique para tirar outra",
 };

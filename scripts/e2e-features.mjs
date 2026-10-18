@@ -142,8 +142,7 @@ try {
   await pop.locator('input[dir=ltr]').fill(SITE + 'products/blue-shoe?id=7');
   await pop.screenshot({ path: path.join(SHOTS, 'f6-popup-edit.png') });
   assert((await pop.locator('button', { hasText: 'Save changes' }).count()) === 1, 'editing shows "Save changes"');
-  await pop.locator('button', { hasText: 'Site only' }).click();
-  assert((await pop.locator('input[dir=ltr]').inputValue()) === SITE, '"Site only" trims the address to the site');
+  assert((await pop.locator('button', { hasText: 'Site only' }).count()) === 0, 'no "Site only" button (the address is edited directly)');
   await pop.locator('input[dir=ltr]').fill(SITE + 'shop/');
   await pop.locator('button', { hasText: 'Save changes' }).click();
   await sleep(1500);
