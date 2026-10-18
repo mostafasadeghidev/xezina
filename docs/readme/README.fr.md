@@ -35,7 +35,7 @@ Xezina règle les deux problèmes :
 | 🔄 **Vraie synchronisation bidirectionnelle** | Les modifications faites en même temps dans différents navigateurs sont fusionnées champ par champ. Un renommage dans un navigateur et un déplacement dans un autre sont tous deux conservés. |
 | ☁️ **Le stockage de votre choix** | Google Drive, Dropbox, OneDrive, WebDAV/Nextcloud, S3/Cloudflare R2, ou un dépôt GitHub privé. |
 | 🔎 **Recherchez dans tout** | Titres, adresses, vos notes, tags, noms de dossiers et descriptions de pages. Tolère les fautes de frappe et reconnaît les variantes de lettres persanes/arabes. Utilisez les filtres `#tag` et `site:example.com`, ou tapez `bm` + espace dans la barre d’adresse. |
-| 🏠 **Accueil et nouvel onglet** | Recherche façon Spotlight avec suggestions en direct et aperçu de chaque résultat. Peut aussi devenir votre page Nouvel onglet. |
+| 🔎 **Recherche rapide** | Appuyez sur <kbd>Ctrl</kbd>+<kbd>K</kbd> n’importe où dans Xezina : une recherche flottante avec suggestions en direct et aperçu de chaque résultat. |
 | ⭐ **Compatible avec l’étoile du navigateur** | Ajoutez un favori avec l’étoile ou Ctrl+D comme d’habitude : Xezina ajoute une capture et la description de la page, puis vous propose d’ajouter des notes. Ou appuyez sur <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. |
 | 🏷️ **Les titres courts restent courts** | Gardez un titre d’une lettre (ou aucun) dans la barre de favoris ; Xezina affiche un nom personnalisé et le vrai titre de la page, et retrouve le favori par les deux. |
 | 📝 **Notes et tags** | Notez pourquoi vous avez enregistré une page et ajoutez-lui des tags. Les notes et les tags se synchronisent avec le favori. |

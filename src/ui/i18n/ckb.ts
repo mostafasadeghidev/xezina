@@ -239,8 +239,6 @@ export const ckb: Strings = {
   copy: 'لەبەرگرتنەوە',
   copied: 'لەبەرگیرایەوە',
   // added in 0.2
-  navHome: "سەرەکی",
-  homeTitle: "بەدوای چیدا دەگەڕێیت؟",
   homeSearch: "گەڕان لە {n} نیشانەدا…",
   homeKeys: "↑ ↓ هەڵبژاردن · Enter کردنەوە · Shift+Enter دەستکاری",
   homeAll: "پیشاندانی هەموو ئەنجامەکان",
@@ -264,9 +262,5 @@ export const ckb: Strings = {
   shortcutSave: "پاشەکەوتکردنی پەڕەی ئێستا لەگەڵ تێبینی",
   shortcutManager: "کردنەوەی Xezina",
   shortcutsChange: "گۆڕینی کورتبڕەکان",
-  newTab: "Xezina وەک پەڕەی بازدەری نوێ بەکاربهێنە",
-  newTabHint: "بە کوژاندنەوەی، بازدەری نوێی ئاسایی وێبگەڕ دەگەڕێتەوە.",
-  newTabDisabled: "Xezina وەک پەڕەی بازدەری نوێ کوژاوەتەوە. دەتوانیت لە ڕێکخستنەکان چالاکی بکەیتەوە، یان لە ڕێکخستنی پێوەکراوەکانی وێبگەڕ لای ببەیت.",
   bookmarkingTitle: "نیشانەکردن",
-  homeOpenFull: "کردنەوەی هەموو کتێبخانەکە",
 };

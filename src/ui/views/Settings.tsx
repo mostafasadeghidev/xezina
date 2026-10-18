@@ -186,9 +186,6 @@ function Bookmarking() {
               </label>
             ))}
           </fieldset>
-          <div className="border-t border-line pt-5">
-            <Switch checked={s.newTab} onChange={(v) => void update({ newTab: v })} label={t('newTab')} hint={t('newTabHint')} />
-          </div>
         </div>
       </Section>
       <Section title={t('shortcutsTitle')} icon={<Keyboard className="size-4" />}>

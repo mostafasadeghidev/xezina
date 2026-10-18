@@ -239,8 +239,6 @@ export const ar: Strings = {
   copy: 'نسخ',
   copied: 'تم النسخ',
   // added in 0.2
-  navHome: "الرئيسية",
-  homeTitle: "عمّ تبحث؟",
   homeSearch: "ابحث في {n} إشارة مرجعية…",
   homeKeys: "↑ ↓ للاختيار · Enter للفتح · Shift+Enter للتعديل",
   homeAll: "عرض كل النتائج",
@@ -264,9 +262,5 @@ export const ar: Strings = {
   shortcutSave: "حفظ الصفحة الحالية مع ملاحظات",
   shortcutManager: "فتح Xezina",
   shortcutsChange: "تغيير الاختصارات",
-  newTab: "استخدام Xezina كصفحة علامة التبويب الجديدة",
-  newTabHint: "أوقفه لاستعادة علامة التبويب الجديدة المعتادة للمتصفح.",
-  newTabDisabled: "تم إيقاف Xezina كصفحة علامة التبويب الجديدة. يمكنك تفعيله من الإعدادات، أو إزالته من إعدادات إضافات المتصفح.",
   bookmarkingTitle: "إضافة الإشارات",
-  homeOpenFull: "فتح المكتبة كاملة",
 };

@@ -687,6 +687,6 @@ async function notifySaved(id: string) {
 export function onNotificationClicked(notificationId: string) {
   if (!notificationId.startsWith('xz-saved:')) return;
   const id = notificationId.slice('xz-saved:'.length);
-  void browser.tabs.create({ url: browser.runtime.getURL('/manager.html') + `#/home?edit=${encodeURIComponent(id)}` });
+  void browser.tabs.create({ url: browser.runtime.getURL('/manager.html') + `#/library/all?edit=${encodeURIComponent(id)}` });
   void browser.notifications.clear(notificationId);
 }

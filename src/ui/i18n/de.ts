@@ -239,8 +239,6 @@ export const de: Strings = {
   copy: 'Kopieren',
   copied: 'Kopiert',
   // added in 0.2
-  navHome: "Start",
-  homeTitle: "Wonach suchen Sie?",
   homeSearch: "{n} Lesezeichen durchsuchen…",
   homeKeys: "↑ ↓ auswählen · Enter öffnen · Shift+Enter bearbeiten",
   homeAll: "Alle Ergebnisse anzeigen",
@@ -264,9 +262,5 @@ export const de: Strings = {
   shortcutSave: "Aktuelle Seite mit Notizen speichern",
   shortcutManager: "Xezina öffnen",
   shortcutsChange: "Tastenkürzel ändern",
-  newTab: "Xezina als Seite für neue Tabs verwenden",
-  newTabHint: "Ausschalten, um die übliche Neuer-Tab-Seite des Browsers zurückzubekommen.",
-  newTabDisabled: "Xezina ist als Neuer-Tab-Seite ausgeschaltet. Sie können es in den Einstellungen wieder einschalten oder in den Erweiterungseinstellungen des Browsers entfernen.",
   bookmarkingTitle: "Lesezeichen setzen",
-  homeOpenFull: "Ganze Bibliothek öffnen",
 };

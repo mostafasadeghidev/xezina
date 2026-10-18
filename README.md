@@ -35,7 +35,7 @@ Xezina fixes both:
 | 🔄 **Real two-way sync** | Changes made in different browsers at the same time are merged field by field. A rename in one browser and a move in another both survive. |
 | ☁️ **Your choice of storage** | Google Drive, Dropbox, OneDrive, WebDAV/Nextcloud, S3/Cloudflare R2, or a private GitHub repository. |
 | 🔎 **Search everything** | Titles, addresses, your notes, tags, folder names and page descriptions. Tolerates typos and understands Persian/Arabic letter variants. Use `#tag` and `site:example.com` filters, or type `bm` + space in the address bar. |
-| 🏠 **Home & new tab** | Spotlight-style search with live suggestions and a preview of each result. Can also be your new tab page. |
+| 🔎 **Quick search** | Press <kbd>Ctrl</kbd>+<kbd>K</kbd> anywhere in Xezina: a floating search with live suggestions and a preview of each result. |
 | ⭐ **Works with the browser’s star** | Bookmark with the star or Ctrl+D as usual: Xezina adds a screenshot and the page description, then lets you add notes. Or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. |
 | 🏷️ **Short titles stay short** | Keep a one-letter title (or none) in the bookmarks bar; Xezina shows a display name and the page’s real title, and finds it by both. |
 | 📝 **Notes & tags** | Write why you saved a page and tag it. Notes and tags sync with the bookmark. |

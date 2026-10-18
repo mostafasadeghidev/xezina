@@ -5,7 +5,7 @@ import { useHashRoute, useLibrary, useRecords, useSettings, useTheme } from '../
 import { I18nProvider, LANGUAGES, resolveLang } from '../i18n';
 import { parseRoute } from '../library';
 import { Dashboard } from './Dashboard';
-import { Home } from './Home';
+import { QuickSearch } from './QuickSearch';
 import { AddDialog, Details, FolderDialog } from './Details';
 import { LibraryView } from './Library';
 import { SettingsView } from './Settings';
@@ -43,6 +43,19 @@ function Shell({ remote }: { remote: boolean }) {
   const [details, setDetails] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [newFolderIn, setNewFolderIn] = useState<string | null>(null);
+  const [quick, setQuick] = useState(false);
+
+  // Ctrl+K / Cmd+K opens the floating search from anywhere in Xezina.
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setQuick((q) => !q);
+      }
+    };
+    window.addEventListener('keydown', on);
+    return () => window.removeEventListener('keydown', on);
+  }, []);
 
   useEffect(() => {
     // The omnibox opens "manager.html#q=…".
@@ -52,7 +65,7 @@ function Shell({ remote }: { remote: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // "#/home?edit=<id>" (from a notification) opens that bookmark's details.
+  // "#/library/all?edit=<id>" (from a notification) opens that bookmark's details.
   useEffect(() => {
     const id = new URLSearchParams(search ?? '').get('edit');
     if (id) {
@@ -79,19 +92,8 @@ function Shell({ remote }: { remote: boolean }) {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar lib={lib} filter={filter} page={page} go={goAndReset} onNewFolder={setNewFolderIn} />
+      <Sidebar lib={lib} filter={filter} page={page} go={goAndReset} onNewFolder={setNewFolderIn} onQuickSearch={() => setQuick(true)} />
       <main className="min-w-0 flex-1">
-        {page === 'home' && (
-          <Home
-            lib={lib}
-            openDetails={setDetails}
-            remote={remote}
-            showAll={(q) => {
-              setQuery(q);
-              go('/library/all');
-            }}
-          />
-        )}
         {page === 'library' && (
           <LibraryView
             lib={lib}
@@ -107,6 +109,17 @@ function Shell({ remote }: { remote: boolean }) {
         {page === 'dashboard' && <Dashboard lib={lib} go={goAndReset} />}
         {page === 'settings' && <SettingsView tab={tab ?? 'general'} go={goAndReset} lib={lib} />}
       </main>
+      <QuickSearch
+        lib={lib}
+        open={quick}
+        onClose={() => setQuick(false)}
+        openDetails={setDetails}
+        remote={remote}
+        showAll={(q) => {
+          setQuery(q);
+          go('/library/all');
+        }}
+      />
       {details && <Details lib={lib} id={details} onClose={() => setDetails(null)} remote={remote} />}
       <AddDialog lib={lib} open={adding} onClose={() => setAdding(false)} folder={filter.kind === 'folder' ? filter.id : ROOT.other} />
       <FolderDialog open={!!newFolderIn} parent={newFolderIn ?? ROOT.other} onClose={() => setNewFolderIn(null)} />

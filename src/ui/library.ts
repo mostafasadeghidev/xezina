@@ -16,9 +16,8 @@ export type Filter =
 
 export type Sort = 'manual' | 'newest' | 'oldest' | 'title' | 'site';
 
-export function parseRoute(route: string): { page: 'home' | 'library' | 'dashboard' | 'settings'; filter: Filter; tab?: string } {
+export function parseRoute(route: string): { page: 'library' | 'dashboard' | 'settings'; filter: Filter; tab?: string } {
   const [, page, a, b] = route.split('/');
-  if (!page || page === 'home') return { page: 'home', filter: { kind: 'all' } };
   if (page === 'dashboard') return { page: 'dashboard', filter: { kind: 'all' } };
   if (page === 'settings') return { page: 'settings', filter: { kind: 'all' }, tab: a || 'general' };
   if (page === 'folder' && a) return { page: 'library', filter: { kind: 'folder', id: decodeURIComponent(a) } };

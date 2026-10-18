@@ -239,8 +239,6 @@ export const pt: Strings = {
   copy: 'Copiar',
   copied: 'Copiado',
   // added in 0.2
-  navHome: "Início",
-  homeTitle: "O que você procura?",
   homeSearch: "Pesquisar em {n} favoritos…",
   homeKeys: "↑ ↓ escolher · Enter abrir · Shift+Enter editar",
   homeAll: "Ver todos os resultados",
@@ -264,9 +262,5 @@ export const pt: Strings = {
   shortcutSave: "Salvar a página atual com notas",
   shortcutManager: "Abrir o Xezina",
   shortcutsChange: "Alterar atalhos",
-  newTab: "Usar o Xezina como página de nova guia",
-  newTabHint: "Desative para voltar à nova guia normal do navegador.",
-  newTabDisabled: "O Xezina está desativado como página de nova guia. Ative de novo nas configurações ou remova nas configurações de extensões do navegador.",
   bookmarkingTitle: "Adicionar favoritos",
-  homeOpenFull: "Abrir a biblioteca completa",
 };

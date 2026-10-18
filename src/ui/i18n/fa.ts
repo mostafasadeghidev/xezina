@@ -239,8 +239,6 @@ export const fa: Strings = {
   copy: 'کپی',
   copied: 'کپی شد',
   // added in 0.2
-  navHome: "خانه",
-  homeTitle: "دنبال چه می‌گردید؟",
   homeSearch: "جستجو در {n} بوکمارک…",
   homeKeys: "↑ ↓ انتخاب · Enter باز کردن · Shift+Enter ویرایش",
   homeAll: "نمایش همهٔ نتیجه‌ها",
@@ -264,9 +262,5 @@ export const fa: Strings = {
   shortcutSave: "ذخیرهٔ صفحهٔ فعلی با یادداشت",
   shortcutManager: "باز کردنِ Xezina",
   shortcutsChange: "تغییرِ میان‌برها",
-  newTab: "Xezina صفحهٔ «تبِ جدید» باشد",
-  newTabHint: "با خاموش کردن، تبِ جدیدِ همیشگیِ مرورگر برمی‌گردد.",
-  newTabDisabled: "Xezina به‌عنوانِ صفحهٔ تبِ جدید خاموش است. می‌توانید آن را در تنظیمات روشن کنید، یا از تنظیماتِ افزونه‌های مرورگر برش دارید.",
   bookmarkingTitle: "بوکمارک کردن",
-  homeOpenFull: "باز کردنِ کتابخانهٔ کامل",
 };

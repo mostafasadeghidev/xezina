@@ -20,8 +20,6 @@ export interface Settings {
   encryption: { enabled: boolean; key: string };
   /** What happens after a bookmark is made with the browser's own star. */
   afterStar: 'popup' | 'notify' | 'none';
-  /** Show the Xezina home page in new tabs. */
-  newTab: boolean;
   previews: {
     /** Fetch descriptions + preview images from the pages. */
     fetchMeta: boolean;
@@ -43,7 +41,6 @@ export const DEFAULT_SETTINGS: Settings = {
   clientIds: {},
   encryption: { enabled: false, key: '' },
   afterStar: 'popup',
-  newTab: true,
   previews: { fetchMeta: true, autoCapture: true, syncImages: true },
 };
 

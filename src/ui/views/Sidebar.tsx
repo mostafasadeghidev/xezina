@@ -8,7 +8,7 @@ import {
   FolderOpen,
   FolderPlus,
   Hash,
-  Home,
+  Search,
   LayoutDashboard,
   Settings as SettingsIcon,
   Star,
@@ -102,12 +102,14 @@ export function Sidebar({
   page,
   go,
   onNewFolder,
+  onQuickSearch,
 }: {
   lib: Library;
   filter: Filter;
   page: string;
   go: (route: string) => void;
   onNewFolder: (parent: string) => void;
+  onQuickSearch: () => void;
 }) {
   const { t } = useI18n();
   const toast = useToast();
@@ -187,7 +189,16 @@ export function Sidebar({
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
-        <Item icon={<Home className="size-4" />} label={t('navHome')} active={page === 'home'} onClick={() => go('/home')} />
+        <button
+          onClick={onQuickSearch}
+          className="mb-2 flex h-9 w-full items-center gap-2 rounded-lg border border-line bg-bg px-2.5 text-[13px] text-muted transition hover:border-accent/50 hover:text-fg"
+        >
+          <Search className="size-4" />
+          <span className="flex-1 truncate text-start">{t('popupSearch')}</span>
+          <kbd className="rounded border border-line px-1 text-[10px]" dir="ltr">
+            Ctrl K
+          </kbd>
+        </button>
         <Item icon={<Bookmark className="size-4" />} label={t('navAll')} count={lib.bookmarks.length} active={is('all')} onClick={() => go('/library/all')} />
         <Item
           icon={<Star className="size-4" />}

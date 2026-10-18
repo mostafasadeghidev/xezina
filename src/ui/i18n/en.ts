@@ -238,8 +238,6 @@ export const en = {
   copy: 'Copy',
   copied: 'Copied',
   // added in 0.2
-  navHome: "Home",
-  homeTitle: "What are you looking for?",
   homeSearch: "Search {n} bookmarks…",
   homeKeys: "↑ ↓ choose · Enter open · Shift+Enter edit",
   homeAll: "Show all results",
@@ -263,11 +261,7 @@ export const en = {
   shortcutSave: "Save the current page with notes",
   shortcutManager: "Open Xezina",
   shortcutsChange: "Change shortcuts",
-  newTab: "Use Xezina as the new tab page",
-  newTabHint: "Turn off to get the browser’s usual new tab back.",
-  newTabDisabled: "Xezina is turned off as your new tab page. Turn it back on in Settings, or remove it in the browser’s extension settings.",
   bookmarkingTitle: "Bookmarking",
-  homeOpenFull: "Open the full library",
 };
 
 export type Strings = typeof en;

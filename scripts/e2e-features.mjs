@@ -1,6 +1,6 @@
 /**
- * Browser test for: duplicates "select extras", the home page live search,
- * the new tab page, the reaction to the browser's star, and title handling.
+ * Browser test for: duplicates "select extras", the Ctrl+K quick search,
+ * the reaction to the browser's star, and title handling.
  *   pnpm build && node scripts/e2e-features.mjs [screenshot-dir]
  */
 import { chromium } from 'playwright-core';
@@ -81,12 +81,14 @@ try {
   const urls = await sw.evaluate(async () => (await chrome.bookmarks.search({})).filter((b) => b.url).map((b) => b.url));
   assert(urls.filter((u) => u.includes('mozilla')).length === 1 && urls.filter((u) => u.includes('figma')).length === 1, 'deleting leaves exactly one of each');
 
-  console.log('2. home page live search with preview');
+  console.log('2. floating quick search (Ctrl+K) with preview');
   const recs = await records(page);
   const mdn = recs.find((r) => r.v.url?.includes('mozilla') && !r.v.del);
   await page.evaluate((id) => chrome.runtime.sendMessage({ type: 'meta', ids: [id], patch: { notes: 'Reference for HTML, CSS and JavaScript', tags: ['docs'] } }), mdn.id);
-  await page.goto(url('manager.html', '#/home'));
-  await page.waitForSelector('text=What are you looking for?');
+  await page.goto(url('manager.html', '#/library/all'));
+  await page.waitForSelector('h1');
+  await page.keyboard.press('Control+K');
+  await page.waitForSelector('[role=dialog] input');
   await page.keyboard.type('javascript');
   await sleep(400);
   const firstHit = await page.locator('[data-i="0"]').textContent();
@@ -104,10 +106,11 @@ try {
   const nativeTitle = await sw.evaluate(async (nid) => (await chrome.bookmarks.get(nid))[0].title, nid);
   assert(nativeTitle === '', 'browser title is still empty after sync');
   all = await records(page);
-  await page.goto(url('manager.html', '#/home'));
-  await page.waitForSelector('text=What are you looking for?');
-  await sleep(300);
-  await page.locator('input').first().fill('hacker');
+  await page.goto('about:blank');
+  await page.goto(url('manager.html', '#/library/all'));
+  await page.waitForSelector('h1');
+  await page.keyboard.press('Control+K');
+  await page.locator('[role=dialog] input').fill('hacker');
   await sleep(400);
   assert(((await page.locator('[data-i="0"]').textContent()) ?? '').includes('Hacker News'), 'display name is shown and searchable');
 
@@ -126,19 +129,9 @@ try {
   all = await records(page);
   assert(all.some((r) => r.v.url === SITE && !r.v.del), 'starred page is in the library');
 
-  console.log('5. new tab page');
-  const nt = await ctx.newPage();
-  await nt.goto(url('newtab.html'));
-  await nt.waitForSelector('text=What are you looking for?', { timeout: 10000 });
-  assert(true, 'new tab shows the Xezina home');
-  await nt.screenshot({ path: path.join(SHOTS, 'f3-newtab.png') });
-  await sw.evaluate(() =>
-    chrome.storage.local.get('settings').then(({ settings }) => chrome.storage.local.set({ settings: { ...settings, newTab: false } })),
-  );
-  await nt.goto(url('newtab.html')).catch(() => undefined); // it navigates away while loading
-  await sleep(1500);
-  console.log('   with the option off, new tab went to:', nt.url());
-  assert(!nt.url().includes('newtab.html') || (await nt.locator('text=turned off').count()) > 0, 'turning it off hands the tab back (or explains how)');
+  console.log('5. no new tab override');
+  const manifest = await sw.evaluate(() => chrome.runtime.getManifest());
+  assert(!manifest.chrome_url_overrides, 'the browser keeps its own new tab page');
 
   console.log('\nALL GOOD — screenshots in', SHOTS);
 } finally {

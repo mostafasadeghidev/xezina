@@ -239,8 +239,6 @@ export const it: Strings = {
   copy: 'Copia',
   copied: 'Copiato',
   // added in 0.2
-  navHome: "Home",
-  homeTitle: "Cosa stai cercando?",
   homeSearch: "Cerca tra {n} segnalibri…",
   homeKeys: "↑ ↓ scegli · Invio apri · Maiusc+Invio modifica",
   homeAll: "Mostra tutti i risultati",
@@ -264,9 +262,5 @@ export const it: Strings = {
   shortcutSave: "Salva la pagina corrente con note",
   shortcutManager: "Apri Xezina",
   shortcutsChange: "Modifica scorciatoie",
-  newTab: "Usa Xezina come pagina Nuova scheda",
-  newTabHint: "Disattiva per riavere la solita nuova scheda del browser.",
-  newTabDisabled: "Xezina è disattivato come pagina Nuova scheda. Riattivalo nelle impostazioni o rimuovilo dalle impostazioni delle estensioni del browser.",
   bookmarkingTitle: "Aggiunta di segnalibri",
-  homeOpenFull: "Apri tutta la libreria",
 };

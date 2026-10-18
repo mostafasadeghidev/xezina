@@ -86,7 +86,7 @@ export function LibraryView({
     const on = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const typing = /INPUT|TEXTAREA|SELECT/.test(target.tagName);
-      if ((e.key === '/' && !typing) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) {
+      if (e.key === '/' && !typing) {
         e.preventDefault();
         searchRef.current?.focus();
         searchRef.current?.select();

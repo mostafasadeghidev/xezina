@@ -239,8 +239,6 @@ export const fr: Strings = {
   copy: 'Copier',
   copied: 'Copié',
   // added in 0.2
-  navHome: "Accueil",
-  homeTitle: "Que cherchez-vous ?",
   homeSearch: "Rechercher parmi {n} favoris…",
   homeKeys: "↑ ↓ choisir · Entrée ouvrir · Maj+Entrée modifier",
   homeAll: "Voir tous les résultats",
@@ -264,9 +262,5 @@ export const fr: Strings = {
   shortcutSave: "Enregistrer la page avec des notes",
   shortcutManager: "Ouvrir Xezina",
   shortcutsChange: "Modifier les raccourcis",
-  newTab: "Utiliser Xezina comme page Nouvel onglet",
-  newTabHint: "Désactivez pour retrouver la page Nouvel onglet habituelle.",
-  newTabDisabled: "Xezina est désactivé comme page Nouvel onglet. Réactivez-le dans les paramètres, ou retirez-le dans les réglages des extensions du navigateur.",
   bookmarkingTitle: "Ajout de favoris",
-  homeOpenFull: "Ouvrir toute la bibliothèque",
 };
