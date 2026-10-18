@@ -658,16 +658,61 @@ export async function onBrowserBookmarked(nativeId: string, url: string) {
   scheduleRemoteSync();
 
   if (s.afterStar === 'popup') {
-    try {
-      // Give the browser's own bookmark bubble a moment to close.
-      await new Promise((r) => setTimeout(r, 500));
-      await (browser.action ?? (browser as unknown as { browserAction: typeof browser.action }).browserAction).openPopup();
-      return;
-    } catch {
-      // Not allowed here (older browser, no focused window…): fall back to a notification.
-    }
+    if (await openToolbarPopup(tab?.windowId)) return;
+    if (await openPopupWindow(tab?.windowId)) return;
   }
   if (s.afterStar !== 'none') await notifySaved(id);
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function noteStarProblem(step: string, e: unknown) {
+  // Kept for troubleshooting (shown nowhere; read with the extension's devtools).
+  await kvSet('starDebug', { step, error: (e as Error)?.message ?? String(e), at: Date.now() });
+}
+
+/**
+ * The extension's own popup, under its toolbar icon next to the star.
+ * The browser refuses while its "Bookmark added" bubble is still open,
+ * so keep trying for a few seconds.
+ */
+async function openToolbarPopup(windowId?: number): Promise<boolean> {
+  const action = browser.action ?? (browser as unknown as { browserAction: typeof browser.action }).browserAction;
+  if (!action?.openPopup) return false;
+  for (let i = 0; i < 8; i++) {
+    await sleep(i === 0 ? 300 : 700);
+    try {
+      await (windowId !== undefined ? action.openPopup({ windowId }) : action.openPopup());
+      return true;
+    } catch (e) {
+      if (i === 7) await noteStarProblem('openPopup', e);
+    }
+  }
+  return false;
+}
+
+/** Fallback: the same page in a small window at the top right, next to the address bar. */
+async function openPopupWindow(windowId?: number): Promise<boolean> {
+  try {
+    const win = windowId !== undefined ? await browser.windows.get(windowId) : await browser.windows.getLastFocused();
+    const width = 400;
+    const height = 600;
+    const left = Math.max(0, (win.left ?? 0) + (win.width ?? 1200) - width - 16);
+    const top = (win.top ?? 0) + 80;
+    await browser.windows.create({
+      url: browser.runtime.getURL('/popup.html') + '?window=1',
+      type: 'popup',
+      width,
+      height,
+      left,
+      top,
+      focused: true,
+    });
+    return true;
+  } catch (e) {
+    await noteStarProblem('window', e);
+    return false;
+  }
 }
 
 async function notifySaved(id: string) {

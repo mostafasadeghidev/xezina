@@ -263,4 +263,7 @@ export const fa: Strings = {
   shortcutManager: "باز کردنِ Xezina",
   shortcutsChange: "تغییرِ میان‌برها",
   bookmarkingTitle: "بوکمارک کردن",
+  folderSearch: "جستجوی پوشه‌ها…",
+  recentFolders: "اخیر",
+  allFolders: "همهٔ پوشه‌ها",
 };

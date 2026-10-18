@@ -263,4 +263,7 @@ export const ckb: Strings = {
   shortcutManager: "کردنەوەی Xezina",
   shortcutsChange: "گۆڕینی کورتبڕەکان",
   bookmarkingTitle: "نیشانەکردن",
+  folderSearch: "گەڕان لە بوخچەکان…",
+  recentFolders: "دوایین",
+  allFolders: "هەموو بوخچەکان",
 };

@@ -263,4 +263,7 @@ export const fr: Strings = {
   shortcutManager: "Ouvrir Xezina",
   shortcutsChange: "Modifier les raccourcis",
   bookmarkingTitle: "Ajout de favoris",
+  folderSearch: "Rechercher un dossier…",
+  recentFolders: "Récents",
+  allFolders: "Tous les dossiers",
 };

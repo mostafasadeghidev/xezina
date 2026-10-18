@@ -263,4 +263,7 @@ export const it: Strings = {
   shortcutManager: "Apri Xezina",
   shortcutsChange: "Modifica scorciatoie",
   bookmarkingTitle: "Aggiunta di segnalibri",
+  folderSearch: "Cerca cartelle…",
+  recentFolders: "Recenti",
+  allFolders: "Tutte le cartelle",
 };

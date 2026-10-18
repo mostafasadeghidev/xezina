@@ -1,6 +1,6 @@
-import { Folder, X } from 'lucide-react';
-import { useMemo, useState, type KeyboardEvent } from 'react';
-import { hostOf, uniqueTags } from '../../core/normalize';
+import { Check, ChevronDown, Folder, Search, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { foldText, hostOf, uniqueTags } from '../../core/normalize';
 import type { Tree, TreeNode } from '../../core/tree';
 import { isRoot, ROOT } from '../../core/types';
 import { faviconUrl, useBlobUrl } from '../hooks';
@@ -150,6 +150,29 @@ export function folderOptions(tree: Tree, name: (n: TreeNode) => string): { id: 
   return out;
 }
 
+const RECENT_KEY = 'xz.recentFolders';
+
+function loadRecent(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]') as string[];
+  } catch {
+    return [];
+  }
+}
+
+function rememberFolder(id: string) {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify([id, ...loadRecent().filter((x) => x !== id)].slice(0, 5)));
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Folder picker with live search: type part of a folder's name (or its
+ * parents') and pick from the matches with the mouse or ↑ ↓ Enter.
+ * Opens inline (not as a floating menu) so it also fits the small popup.
+ */
 export function FolderSelect({
   tree,
   value,
@@ -161,20 +184,165 @@ export function FolderSelect({
   onChange: (id: string) => void;
   exclude?: string;
 }) {
+  const { t } = useI18n();
   const name = useFolderName();
-  const opts = folderOptions(tree, (n) => name(n));
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  const all = useMemo(() => {
+    const out: { id: string; label: string; path: string; depth: number; key: string }[] = [];
+    const walk = (n: TreeNode, depth: number, trail: string[]) => {
+      const label = name(n);
+      const path = [...trail, label];
+      if (n.id !== exclude) out.push({ id: n.id, label, path: path.join(' › '), depth, key: foldText(path.join(' ')) });
+      for (const c of n.children) if (c.kind === 'folder') walk(c, depth + 1, path);
+    };
+    for (const rid of [ROOT.toolbar, ROOT.other, ROOT.menu, ROOT.mobile]) {
+      const r = tree.roots[rid];
+      if ((rid === ROOT.menu || rid === ROOT.mobile) && !r.children.length) continue;
+      walk(r, 0, []);
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tree, exclude, t]);
+
+  const shown = useMemo(() => {
+    const words = foldText(query).split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      const byId = new Map(all.map((o) => [o.id, o]));
+      const recent = loadRecent()
+        .map((id) => byId.get(id))
+        .filter((o): o is (typeof all)[number] => !!o)
+        .slice(0, 3);
+      return { recent, list: all };
+    }
+    // Every word must appear somewhere in the folder's path; the folder's own name ranks first.
+    const hits = all.filter((o) => words.every((w) => o.key.includes(w)));
+    hits.sort((a, b) => {
+      const an = words.every((w) => foldText(a.label).includes(w)) ? 0 : 1;
+      const bn = words.every((w) => foldText(b.label).includes(w)) ? 0 : 1;
+      return an - bn || a.depth - b.depth;
+    });
+    return { recent: [], list: hits };
+  }, [all, query]);
+
+  const items = [...shown.recent, ...shown.list];
+  const current = all.find((o) => o.id === value);
+
+  useEffect(() => setActive(0), [query, open]);
+  useEffect(() => {
+    listRef.current?.querySelector<HTMLElement>(`[data-i="${active}"]`)?.scrollIntoView({ block: 'nearest' });
+  }, [active]);
+
+  const choose = (id: string) => {
+    onChange(id);
+    rememberFolder(id);
+    setOpen(false);
+    setQuery('');
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={cx(inputClass, 'flex h-10 cursor-pointer items-center gap-2 text-start')}
+        title={current?.path}
+      >
+        <Folder className="size-4 shrink-0 text-muted" />
+        <span dir="auto" className="min-w-0 flex-1 truncate">
+          {current?.label ?? '—'}
+        </span>
+        {current && current.depth > 0 && (
+          <span dir="auto" className="max-w-[40%] truncate text-xs text-muted">
+            {current.path.split(' › ').slice(0, -1).join(' › ')}
+          </span>
+        )}
+        <ChevronDown className="size-4 shrink-0 text-muted" />
+      </button>
+    );
+  }
+
+  const row = (o: (typeof all)[number], i: number, flat: boolean) => (
+    <button
+      key={`${flat ? 'r' : 'a'}-${o.id}`}
+      type="button"
+      data-i={i}
+      onMouseEnter={() => setActive(i)}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={() => choose(o.id)}
+      className={cx(
+        'flex w-full items-center gap-2 rounded-md py-1.5 pe-2 text-start text-[13px]',
+        i === active ? 'bg-accent-soft text-accent' : 'hover:bg-hover',
+        o.id === value && 'font-semibold',
+      )}
+      style={{ paddingInlineStart: flat || query ? 8 : 8 + o.depth * 14 }}
+    >
+      <Folder className="size-3.5 shrink-0 opacity-70" />
+      <span dir="auto" className="min-w-0 flex-1 truncate">
+        {o.label}
+      </span>
+      {(flat || query) && o.depth > 0 && (
+        <span dir="auto" className="max-w-[50%] truncate text-[11px] text-muted">
+          {o.path.split(' › ').slice(0, -1).join(' › ')}
+        </span>
+      )}
+      {o.id === value && <Check className="size-3.5 shrink-0" />}
+    </button>
+  );
+
   return (
-    <div className="relative">
-      <Folder className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-      <select value={value} onChange={(e) => onChange(e.target.value)} className={cx(inputClass, 'h-10 cursor-pointer ps-9')}>
-        {opts
-          .filter((o) => o.id !== exclude)
-          .map((o) => (
-            <option key={o.id} value={o.id}>
-              {'  '.repeat(o.depth) + o.label}
-            </option>
-          ))}
-      </select>
+    <div
+      ref={boxRef}
+      className="rounded-lg border border-accent bg-card ring-2 ring-accent/20"
+      onBlur={(e) => {
+        if (!boxRef.current?.contains(e.relatedTarget as Node)) {
+          setOpen(false);
+          setQuery('');
+        }
+      }}
+    >
+      <div className="relative border-b border-line">
+        <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
+        <input
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('folderSearch')}
+          className="h-9 w-full bg-transparent pe-3 ps-9 text-sm outline-none placeholder:text-muted/70"
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setActive((a) => Math.min(a + 1, items.length - 1));
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              setActive((a) => Math.max(a - 1, 0));
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              if (items[active]) choose(items[active].id);
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              e.stopPropagation();
+              setOpen(false);
+              setQuery('');
+            }
+          }}
+        />
+      </div>
+      <div ref={listRef} className="max-h-56 overflow-y-auto p-1">
+        {shown.recent.length > 0 && (
+          <>
+            <div className="px-2 pb-0.5 pt-1 text-[11px] font-medium text-muted">{t('recentFolders')}</div>
+            {shown.recent.map((o, i) => row(o, i, true))}
+            <div className="px-2 pb-0.5 pt-2 text-[11px] font-medium text-muted">{t('allFolders')}</div>
+          </>
+        )}
+        {shown.list.map((o, i) => row(o, i + shown.recent.length, false))}
+        {!items.length && <p className="p-3 text-center text-xs text-muted">{t('noResults')}</p>}
+      </div>
     </div>
   );
 }

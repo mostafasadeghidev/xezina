@@ -128,6 +128,27 @@ try {
   all = await records(page);
   assert(all.some((r) => r.v.url === SITE && !r.v.del), 'starred page is in the library');
 
+  console.log('6. folder picker with live search');
+  await sw.evaluate(async () => {
+    const d = await chrome.bookmarks.create({ parentId: '1', title: 'Design' });
+    const t = await chrome.bookmarks.create({ parentId: d.id, title: 'Typography' });
+    await chrome.bookmarks.create({ parentId: t.id, title: 'x', url: 'https://fonts.google.com/' });
+  });
+  await sleep(1500);
+  await page.goto('about:blank');
+  await page.goto(url('manager.html', '#/library/all'));
+  await page.waitForSelector('h1');
+  await page.locator('button', { hasText: 'Add bookmark' }).click();
+  await page.locator('[role=dialog], .fixed').locator('button[title]').filter({ hasText: 'Other bookmarks' }).first().click();
+  await page.locator('input[placeholder="Search folders…"]').fill('typo');
+  await sleep(200);
+  const options = await page.locator('input[placeholder="Search folders…"] >> xpath=../..').locator('button').allTextContents();
+  assert(options.length === 1 && options[0].includes('Typography') && options[0].includes('Design'), `typing "typo" finds Design › Typography (${options.join(' | ')})`);
+  await page.keyboard.press('Enter');
+  assert((await page.getByText('Typography').count()) >= 1, 'Enter picks the folder');
+  await page.screenshot({ path: path.join(SHOTS, 'f4-folder-picker.png') });
+  await page.keyboard.press('Escape');
+
   console.log('5. no new tab override');
   const manifest = await sw.evaluate(() => chrome.runtime.getManifest());
   assert(!manifest.chrome_url_overrides, 'the browser keeps its own new tab page');

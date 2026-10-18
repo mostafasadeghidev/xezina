@@ -263,4 +263,7 @@ export const pt: Strings = {
   shortcutManager: "Abrir o Xezina",
   shortcutsChange: "Alterar atalhos",
   bookmarkingTitle: "Adicionar favoritos",
+  folderSearch: "Pesquisar pastas…",
+  recentFolders: "Recentes",
+  allFolders: "Todas as pastas",
 };

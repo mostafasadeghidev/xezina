@@ -262,6 +262,9 @@ export const en = {
   shortcutManager: "Open Xezina",
   shortcutsChange: "Change shortcuts",
   bookmarkingTitle: "Bookmarking",
+  folderSearch: "Search folders…",
+  recentFolders: "Recent",
+  allFolders: "All folders",
 };
 
 export type Strings = typeof en;

@@ -115,6 +115,8 @@ function Popup({ remote }: { remote: boolean }) {
         await send({ type: 'meta', ids: [existing.id], patch: { notes, tags } });
         if (parent !== existing.parent) await send({ type: 'move', ids: [existing.id], parent });
         toast(t('saved'));
+        // Opened by the star: done after saving.
+        if (starId) setTimeout(() => window.close(), 600);
       } else {
         const id = await send<string | null>({ type: 'create', parent, title: title || tab!.url, url: tab!.url });
         if (id) {

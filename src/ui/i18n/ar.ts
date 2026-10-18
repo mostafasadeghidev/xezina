@@ -263,4 +263,7 @@ export const ar: Strings = {
   shortcutManager: "فتح Xezina",
   shortcutsChange: "تغيير الاختصارات",
   bookmarkingTitle: "إضافة الإشارات",
+  folderSearch: "ابحث في المجلدات…",
+  recentFolders: "الأخيرة",
+  allFolders: "كل المجلدات",
 };
