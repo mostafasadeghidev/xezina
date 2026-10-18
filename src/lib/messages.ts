@@ -18,6 +18,8 @@ export type Message =
   | { type: 'enrich:stop' }
   | { type: 'refresh'; id: string }
   | { type: 'shoot'; id: string }
+  | { type: 'frame:allow' }
+  | { type: 'shot:set'; id: string; dataUrl: string }
   | { type: 'capture'; tabId: number; windowId: number; id: string }
   | { type: 'blob:fetch'; hash: string }
   | { type: 'image:set'; id: string; dataUrl: string }

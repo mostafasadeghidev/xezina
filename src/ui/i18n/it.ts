@@ -283,4 +283,8 @@ export const it: Strings = {
   needsAccess: "Consenti prima a Xezina di leggere le pagine (Impostazioni → Anteprime).",
   takeScreenshot: "Scatta screenshot",
   takingScreenshot: "Apertura del sito…",
+  liveView: "Vista dal vivo",
+  useThisView: "Usa questa vista",
+  openInWindow: "Apri invece in una finestra",
+  liveLoading: "Caricamento del sito…",
 };

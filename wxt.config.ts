@@ -18,7 +18,7 @@ export default defineConfig({
       'identity',
       'activeTab',
       'notifications',
-      ...(browser === 'firefox' ? [] : ['favicon']),
+      ...(browser === 'firefox' ? [] : ['favicon', 'declarativeNetRequestWithHostAccess']),
     ],
     // Requested at runtime only when the user enables previews, link checks or a remote storage.
     optional_host_permissions: ['<all_urls>'],

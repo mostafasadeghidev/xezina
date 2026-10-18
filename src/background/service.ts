@@ -502,6 +502,39 @@ async function captureWhenSettled(windowId: number): Promise<string> {
   return prev;
 }
 
+/**
+ * Lets pages load inside Xezina's own preview frame in one tab: removes the
+ * headers that forbid framing, only for frames in that tab.
+ */
+export async function allowFraming(tabId: number | undefined) {
+  type SessionRules = { updateSessionRules(o: { removeRuleIds: number[]; addRules: unknown[] }): Promise<void> };
+  const dnr = (browser as unknown as { declarativeNetRequest?: SessionRules }).declarativeNetRequest;
+  if (!dnr || tabId === undefined || tabId < 0) return false;
+  const id = 1000 + (tabId % 1_000_000);
+  await dnr.updateSessionRules({
+    removeRuleIds: [id],
+    addRules: [
+      {
+        id,
+        priority: 1,
+        action: {
+          type: 'modifyHeaders',
+          responseHeaders: ['x-frame-options', 'content-security-policy', 'content-security-policy-report-only', 'cross-origin-resource-policy'].map(
+            (header) => ({ header, operation: 'remove' }),
+          ),
+        },
+        condition: { tabIds: [tabId], resourceTypes: ['sub_frame'] },
+      },
+    ],
+  });
+  return true;
+}
+
+/** A screenshot cropped by the page (live preview) becomes the preview. */
+export async function setShot(id: string, dataUrl: string) {
+  return storeShot(id, dataUrl);
+}
+
 /** "Refresh info" for one bookmark; waits for the result. */
 export async function refreshOne(id: string): Promise<RefreshResult> {
   if (!(await hasAllUrls())) throw new Error('needs-access');

@@ -283,4 +283,8 @@ export const ar: Strings = {
   needsAccess: "اسمح أولًا لـ Xezina بقراءة الصفحات (الإعدادات ← المعاينات).",
   takeScreenshot: "التقاط لقطة",
   takingScreenshot: "جارٍ فتح الموقع…",
+  liveView: "عرض مباشر",
+  useThisView: "استخدام هذا العرض",
+  openInWindow: "الفتح في نافذة منفصلة",
+  liveLoading: "جارٍ تحميل الموقع…",
 };

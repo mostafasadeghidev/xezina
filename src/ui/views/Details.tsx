@@ -6,6 +6,7 @@ import { ROOT } from '../../core/types';
 import { linkHealth } from '../../enrich/metadata';
 import { send } from '../../lib/messages';
 import { FolderSelect, Preview, TagInput } from '../components/bits';
+import { LiveFrame } from '../components/LiveFrame';
 import { Badge, Button, cx, Field, IconButton, Input, Modal, Textarea, useConfirm, useToast } from '../components/ui';
 import type { Library } from '../hooks';
 import { useI18n } from '../i18n';
@@ -24,6 +25,8 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [shooting, setShooting] = useState(false);
+  const [live, setLive] = useState(false);
+  const canLive = !import.meta.env.FIREFOX && /^https?:/i.test(node?.url ?? '');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -88,6 +91,15 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
     }
   };
 
+  /** Shows the site itself in the preview box (asks for page access first). */
+  const openLive = async () => {
+    const origins = ['<all_urls>'];
+    if (!(await browser.permissions.contains({ origins }))) {
+      if (!(await browser.permissions.request({ origins }))) return toast(t('needsAccess'), 'error');
+    }
+    setLive(true);
+  };
+
   /** Opens the site in its own window and screenshots it once it has loaded. */
   const shoot = async () => {
     const origins = ['<all_urls>'];
@@ -144,7 +156,24 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
 
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
           <div className="group relative aspect-[16/10] overflow-hidden rounded-xl border border-line bg-hover">
-            <Preview node={node} remote={remote} />
+            {live ? (
+              <LiveFrame
+                url={node.url}
+                onClose={() => setLive(false)}
+                onWindow={() => {
+                  setLive(false);
+                  void shoot();
+                }}
+                onCapture={async (dataUrl) => {
+                  await send({ type: 'shot:set', id, dataUrl });
+                  setLive(false);
+                  toast(t('done'));
+                }}
+              />
+            ) : (
+              <Preview node={node} remote={remote} />
+            )}
+            {!live && (
             <div
               className={cx(
                 'absolute inset-x-2 bottom-2 flex flex-wrap justify-end gap-1.5 transition group-hover:opacity-100',
@@ -160,12 +189,12 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
                 {refreshing ? t('refreshing') : t('refreshPreview')}
               </button>
               <button
-                onClick={() => void shoot()}
+                onClick={() => void (canLive ? openLive() : shoot())}
                 disabled={shooting}
                 className="flex items-center gap-1 rounded-md bg-black/55 px-2 py-1 text-xs text-white backdrop-blur hover:bg-black/70 disabled:opacity-80"
               >
                 <Camera className={cx('size-3.5', shooting && 'animate-pulse')} />
-                {shooting ? t('takingScreenshot') : t('takeScreenshot')}
+                {shooting ? t('takingScreenshot') : canLive ? t('liveView') : t('takeScreenshot')}
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
@@ -175,7 +204,8 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
                 {t('uploadImage')}
               </button>
             </div>
-            {v.imgSrc && (
+            )}
+            {!live && v.imgSrc && (
               <span className="absolute start-2 top-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-white backdrop-blur">
                 {v.imgSrc === 'shot' ? (
                   <span className="inline-flex items-center gap-1">
@@ -275,8 +305,6 @@ export function AddDialog({ lib, open, onClose, folder }: { lib: Library; open: 
   const [title, setTitle] = useState('');
   const [parent, setParent] = useState<string>(folder ?? ROOT.other);
   const [busy, setBusy] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [shooting, setShooting] = useState(false);
   useEffect(() => {
     if (open) {
       setUrl('');

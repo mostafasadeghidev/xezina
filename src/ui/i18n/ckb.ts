@@ -283,4 +283,8 @@ export const ckb: Strings = {
   needsAccess: "سەرەتا ڕێگە بدە Xezina پەڕەکان بخوێنێتەوە (ڕێکخستنەکان ← پێشبینین).",
   takeScreenshot: "گرتنی وێنەی ماڵپەڕ",
   takingScreenshot: "کردنەوەی ماڵپەڕ…",
+  liveView: "پیشاندانی ڕاستەوخۆ",
+  useThisView: "ئەم دیمەنە بەکاربهێنە",
+  openInWindow: "لە پەنجەرەیەکی جیادا بیکەرەوە",
+  liveLoading: "بارکردنی ماڵپەڕ…",
 };

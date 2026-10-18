@@ -282,6 +282,10 @@ export const en = {
   needsAccess: "Allow Xezina to read pages first (Settings → Previews).",
   takeScreenshot: "Take screenshot",
   takingScreenshot: "Opening the site…",
+  liveView: "Live view",
+  useThisView: "Use this view",
+  openInWindow: "Open in a window instead",
+  liveLoading: "Loading the site…",
 };
 
 export type Strings = typeof en;

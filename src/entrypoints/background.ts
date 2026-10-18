@@ -28,6 +28,8 @@ import {
   removeNative,
   refreshOne,
   shootPage,
+  allowFraming,
+  setShot,
   reschedule,
   restoreBackup,
   scheduleEnrich,
@@ -41,7 +43,7 @@ import {
   getStatus,
 } from '../background/service';
 
-async function handle(msg: Message): Promise<unknown> {
+async function handle(msg: Message, sender?: { tab?: { id?: number } }): Promise<unknown> {
   switch (msg.type) {
     case 'sync':
       return sync({ mode: msg.mode, allowMassDelete: msg.allowMassDelete });
@@ -69,6 +71,10 @@ async function handle(msg: Message): Promise<unknown> {
       return refreshOne(msg.id);
     case 'shoot':
       return shootPage(msg.id);
+    case 'frame:allow':
+      return allowFraming(sender?.tab?.id);
+    case 'shot:set':
+      return setShot(msg.id, msg.dataUrl);
     case 'enrich:stop':
       stopEnrich();
       return true;
@@ -128,7 +134,7 @@ export default defineBackground(() => {
   const isFirefox = import.meta.env.FIREFOX;
 
   browser.runtime.onMessage.addListener((msg: unknown, _sender, sendResponse) => {
-    handle(msg as Message).then(
+    handle(msg as Message, _sender).then(
       (data) => sendResponse({ ok: true, data: data ?? null } satisfies Reply),
       (e: Error) => sendResponse({ ok: false, error: e?.message ?? String(e) } satisfies Reply),
     );

@@ -19,6 +19,15 @@ function assert(cond, msg) {
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
 let version = 1;
 const site = http.createServer((req, res) => {
+  if (req.url.startsWith('/framed')) {
+    // Like most big sites: refuses to be shown inside another page.
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "frame-ancestors 'none'",
+    });
+    return res.end('<html><head><title>Framed</title></head><body style="margin:0;height:100vh;background:rgb(0,0,220)"><h1 style="color:#fff">LIVE OK</h1></body></html>');
+  }
   if (req.url.startsWith('/slow')) {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(`<html><head><title>Slow</title><style>
@@ -113,6 +122,44 @@ try {
     return [...g.getImageData(Math.floor(bmp.width / 2), Math.floor(bmp.height / 2), 1, 1).data].slice(0, 3);
   }, (await rec(SITE + 'slow')).v.img);
   assert(color[1] > 150 && color[0] < 80, `the picture shows the finished page, not the loading screen (rgb ${color.join(',')})`);
+  await sw.evaluate((u) => chrome.bookmarks.create({ parentId: '1', title: 'Framed', url: u }), SITE + 'framed');
+  await sleep(1500);
+  await page.goto('about:blank');
+  await page.goto(`chrome-extension://${id}/manager.html#/library/all`);
+  await page.waitForSelector('h1');
+  await page.locator('h3', { hasText: 'Framed' }).first().click();
+  await page.locator('aside').getByText('Live view').click();
+  await page.waitForSelector('iframe[title=live]');
+  let frameText = '';
+  for (let i = 0; i < 20 && !frameText.includes('LIVE OK'); i++) {
+    await sleep(300);
+    const f = page.frames().find((fr) => fr.url().includes('/framed'));
+    frameText = f ? await f.locator('body').innerText().catch(() => '') : '';
+  }
+  assert(frameText.includes('LIVE OK'), 'a site that forbids framing shows live inside the preview box');
+  await page.bringToFront(); // as in real use: the tab is in front of the user
+  await sleep(500);
+  await page.locator('aside').getByText('Use this view').click();
+  let framed = await rec(SITE + 'framed');
+  for (let i = 0; i < 16 && framed.v.imgSrc !== 'shot'; i++) {
+    await sleep(500);
+    framed = await rec(SITE + 'framed');
+  }
+  assert(framed.v.imgSrc === 'shot' && framed.v.img, '"Use this view" saves that view as the preview');
+  const px = await page.evaluate(async (hash) => {
+    const req = indexedDB.open('xezina');
+    const db = await new Promise((r) => (req.onsuccess = () => r(req.result)));
+    const row = await new Promise((r) => {
+      const q = db.transaction('blobs').objectStore('blobs').get(hash);
+      q.onsuccess = () => r(q.result);
+    });
+    const bmp = await createImageBitmap(row.blob);
+    const c = new OffscreenCanvas(bmp.width, bmp.height);
+    const g = c.getContext('2d');
+    g.drawImage(bmp, 0, 0);
+    return [...g.getImageData(Math.floor(bmp.width * 0.7), Math.floor(bmp.height * 0.7), 1, 1).data].slice(0, 3);
+  }, framed.v.img);
+  assert(px[2] > 180 && px[0] < 60, `the picture is the site itself, cropped to the box (rgb ${px.join(',')})`);
   console.log('\nALL GOOD');
 } finally {
   await ctx.close();

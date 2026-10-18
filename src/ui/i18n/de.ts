@@ -283,4 +283,8 @@ export const de: Strings = {
   needsAccess: "Erlauben Sie Xezina zuerst, Seiten zu lesen (Einstellungen → Vorschauen).",
   takeScreenshot: "Screenshot aufnehmen",
   takingScreenshot: "Website wird geöffnet…",
+  liveView: "Live-Ansicht",
+  useThisView: "Diese Ansicht verwenden",
+  openInWindow: "Stattdessen in Fenster öffnen",
+  liveLoading: "Website wird geladen…",
 };

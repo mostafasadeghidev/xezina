@@ -283,4 +283,8 @@ export const fa: Strings = {
   needsAccess: "اول اجازهٔ «دسترسی به صفحه‌ها» را بدهید (تنظیمات ← پیش‌نمایش‌ها).",
   takeScreenshot: "گرفتنِ عکسِ سایت",
   takingScreenshot: "در حالِ باز کردنِ سایت…",
+  liveView: "نمایشِ زنده",
+  useThisView: "استفاده از همین نما",
+  openInWindow: "باز کردن در پنجرهٔ جدا",
+  liveLoading: "در حالِ بارگذاریِ سایت…",
 };
