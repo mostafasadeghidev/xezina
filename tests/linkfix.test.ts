@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findFix, linkHealth, needsOwnWindow, parentUrls, type PageInfo } from '../src/enrich/metadata';
+import { findFix, parentUrls, type PageInfo } from '../src/enrich/metadata';
 
 const page = (status: number, finalUrl: string): PageInfo => ({ status, finalUrl, title: '', desc: '', image: '' });
 
@@ -43,17 +43,5 @@ describe('link fixer', () => {
   it('ignores harmless redirects and login pages', async () => {
     expect(await findFix('http://a.com/x', page(200, 'https://www.a.com/x/'), site([]))).toEqual({ url: '', kind: '' });
     expect(await findFix('https://a.com/private', page(200, 'https://a.com/login?next=/private'), site([]))).toEqual({ url: '', kind: '' });
-  });
-});
-
-describe('login-only pages (Webflow previews)', () => {
-  const preview = 'https://preview.webflow.com/preview/figma-webflow-tutorial?workflow=preview';
-  it('are opened in their own window and never called broken', () => {
-    expect(needsOwnWindow(preview)).toBe(true);
-    expect(needsOwnWindow('https://my-site.webflow.io/')).toBe(false);
-    expect(linkHealth(404, Date.now(), preview)).toBe('blocked');
-  });
-  it('get no "fix" pointing at webflow.com', async () => {
-    expect(await findFix(preview, page(404, ''), site(['https://preview.webflow.com/', 'https://webflow.com/']))).toEqual({ url: '', kind: '' });
   });
 });

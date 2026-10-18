@@ -1,7 +1,7 @@
 import { displayTitle, hostOf, normalizeUrl } from '../core/normalize';
 import { searchIds } from '../core/search';
 import type { TreeNode } from '../core/tree';
-import { linkHealth, needsOwnWindow } from '../enrich/metadata';
+import { linkHealth } from '../enrich/metadata';
 import type { Library } from './hooks';
 
 export type Filter =
@@ -156,5 +156,5 @@ export function pickKeeper(lib: Library, ids: string[]): string {
 
 /** Shown under "Broken links": a missing page, or one that now lives at another address. */
 export function needsFixing(b: TreeNode): boolean {
-  return linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken' || !!(b.rec.v.fixUrl && b.rec.v.fixKind && !needsOwnWindow(b.url));
+  return linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken' || !!(b.rec.v.fixUrl && b.rec.v.fixKind);
 }

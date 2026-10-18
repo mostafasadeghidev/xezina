@@ -61,22 +61,21 @@ export function parseHead(html: string, baseUrl: string): Omit<PageInfo, 'status
 
 /** Fetches a page; a network error, timeout or server error is retried once. */
 export async function fetchPage(url: string, timeout = 20_000): Promise<PageInfo> {
-  const withLogin = needsOwnWindow(url);
-  const first = await fetchOnce(url, timeout, withLogin);
+  const first = await fetchOnce(url, timeout);
   if (first.status !== 0 && first.status < 500) return first;
   await new Promise((r) => setTimeout(r, 3000));
-  const second = await fetchOnce(url, timeout, withLogin);
+  const second = await fetchOnce(url, timeout);
   return second.status !== 0 && second.status < 500 ? second : first.status ? first : second;
 }
 
-async function fetchOnce(url: string, timeout: number, withLogin = false): Promise<PageInfo> {
+async function fetchOnce(url: string, timeout: number): Promise<PageInfo> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
   try {
     const res = await fetch(url, {
       signal: ctrl.signal,
       redirect: 'follow',
-      credentials: withLogin ? 'include' : 'omit',
+      credentials: 'omit',
       headers: { Accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5' },
     });
     const type = res.headers.get('content-type') ?? '';
@@ -145,7 +144,6 @@ export function linkHealth(
 ): 'ok' | 'broken' | 'blocked' | 'unknown' {
   if (url && isProtectedPage(url)) return 'blocked';
   if (!checkedAt) return 'unknown';
-  if (url && needsOwnWindow(url) && status !== undefined && (status === 0 || status >= 400)) return 'blocked';
   if (status === undefined) return 'unknown';
   if (status >= 200 && status < 400) return 'ok';
   // Only the site itself saying "this page does not exist" counts as broken.
@@ -202,7 +200,6 @@ function isRootUrl(url: string): boolean {
  *  - the page is gone (404/410) → the nearest working parent address
  */
 export async function findFix(url: string, info: PageInfo, fetcher = fetchPage): Promise<{ url: string; kind: FixKind }> {
-  if (needsOwnWindow(url)) return { url: '', kind: '' };
   const ok = info.status >= 200 && info.status < 400;
   if (ok) {
     const final = info.finalUrl;
@@ -219,17 +216,4 @@ export async function findFix(url: string, info: PageInfo, fetcher = fetchPage):
     }
   }
   return { url: '', kind: '' };
-}
-
-/**
- * Pages that only work as a normal tab with the user's login (they leave a
- * frame for their home page), so the live view uses a separate window.
- */
-export function needsOwnWindow(url: string): boolean {
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    return host === 'preview.webflow.com' || host === 'webflow.com' || host.endsWith('.design.webflow.com');
-  } catch {
-    return false;
-  }
 }
