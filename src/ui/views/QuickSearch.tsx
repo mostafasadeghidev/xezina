@@ -103,6 +103,7 @@ export function QuickSearch({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKey}
+            autoFocus
             placeholder={t('homeSearch', { n: lib.bookmarks.length })}
             className="h-14 w-full bg-transparent pe-20 ps-14 text-lg outline-none placeholder:text-muted/70"
             aria-autocomplete="list"

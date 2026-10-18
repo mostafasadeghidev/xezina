@@ -88,8 +88,7 @@ try {
   await page.goto(url('manager.html', '#/library/all'));
   await page.waitForSelector('h1');
   await page.keyboard.press('Control+K');
-  await page.waitForSelector('[role=dialog] input');
-  await page.keyboard.type('javascript');
+  await page.locator('[role=dialog] input').fill('javascript');
   await sleep(400);
   const firstHit = await page.locator('[data-i="0"]').textContent();
   assert(/Docs|MDN/.test(firstHit ?? ''), `live suggestion found by note (${firstHit?.slice(0, 40)})`);

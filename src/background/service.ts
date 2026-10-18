@@ -641,24 +641,25 @@ export async function onBrowserBookmarked(nativeId: string, url: string) {
     if (!tab?.url || normalizeUrl(tab.url) !== normalizeUrl(url)) return;
   } else {
     // Without it, only react to a single bookmark (not a paste or drag of many).
-    await new Promise((r) => setTimeout(r, 1200));
-    if (recentCreates.some((t) => t !== now && Math.abs(t - now) < 1500)) return;
+    await new Promise((r) => setTimeout(r, 700));
+    if (recentCreates.some((t) => t !== now && Math.abs(t - now) < 1000)) return;
   }
   await new Promise((r) => setTimeout(r, 400));
   await sync({ localOnly: true }).catch(() => undefined);
   const id = await recordIdOf(nativeId);
   if (!id) return;
+  // The popup shows this bookmark even when it cannot read the tab's address.
+  await kvSet('lastStar', { id, at: Date.now() });
   if (access && s.previews.autoCapture && tab?.windowId !== undefined) {
     await capture(tab.windowId, id).catch(() => undefined);
   }
   if (access) void enrich([id]).catch(() => undefined);
   scheduleRemoteSync();
 
-  // The popup needs to know the page's address, which needs page access.
-  if (s.afterStar === 'popup' && access) {
+  if (s.afterStar === 'popup') {
     try {
       // Give the browser's own bookmark bubble a moment to close.
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 500));
       await (browser.action ?? (browser as unknown as { browserAction: typeof browser.action }).browserAction).openPopup();
       return;
     } catch {

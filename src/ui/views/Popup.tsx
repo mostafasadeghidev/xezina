@@ -4,6 +4,7 @@ import { browser } from 'wxt/browser';
 import { displayTitle, hostOf, normalizeUrl } from '../../core/normalize';
 import { searchIds } from '../../core/search';
 import { ROOT } from '../../core/types';
+import { db } from '../../db/db';
 import { send } from '../../lib/messages';
 import { Favicon, FolderSelect, TagInput, useFolderName } from '../components/bits';
 import { Button, cx, IconButton, Input, Textarea, ToastProvider, useToast } from '../components/ui';
@@ -57,6 +58,16 @@ function Popup({ remote }: { remote: boolean }) {
   });
   const [busy, setBusy] = useState(false);
   const [newId, setNewId] = useState<string | null>(null);
+  /** Set when Xezina opened this window right after the browser's star was used. */
+  const [starId, setStarId] = useState<string | null>(null);
+
+  useEffect(() => {
+    void db.kv.get('lastStar').then((row) => {
+      const v = row?.value as { id: string; at: number } | undefined;
+      if (v && Date.now() - v.at < 60_000) setStarId(v.id);
+      if (v) void db.kv.delete('lastStar');
+    });
+  }, []);
 
   useEffect(() => {
     void browser.tabs.query({ active: true, currentWindow: true }).then(([t0]) => {
@@ -65,7 +76,9 @@ function Popup({ remote }: { remote: boolean }) {
   }, []);
 
   const existing = useMemo(() => {
-    if (!lib || !tab) return undefined;
+    if (!lib) return undefined;
+    if (starId && lib.tree.byId.has(starId)) return lib.tree.byId.get(starId);
+    if (!tab) return undefined;
     if (newId) return lib.tree.byId.get(newId);
     const key = normalizeUrl(tab.url);
     return lib.bookmarks.find((b) => normalizeUrl(b.url) === key);
@@ -90,10 +103,11 @@ function Popup({ remote }: { remote: boolean }) {
       .filter(Boolean);
   }, [lib, query]);
 
-  const bookmarkable = !!tab && /^(https?|ftp|file):/i.test(tab.url);
+  const pageUrl = existing?.url ?? tab?.url ?? '';
+  const bookmarkable = !!existing || (!!tab && /^(https?|ftp|file):/i.test(tab.url));
 
   const save = async () => {
-    if (!tab) return;
+    if (!tab && !existing) return;
     setBusy(true);
     try {
       if (existing) {
@@ -102,7 +116,7 @@ function Popup({ remote }: { remote: boolean }) {
         if (parent !== existing.parent) await send({ type: 'move', ids: [existing.id], parent });
         toast(t('saved'));
       } else {
-        const id = await send<string | null>({ type: 'create', parent, title: title || tab.url, url: tab.url });
+        const id = await send<string | null>({ type: 'create', parent, title: title || tab!.url, url: tab!.url });
         if (id) {
           setNewId(id);
           if (notes || tags.length) await send({ type: 'meta', ids: [id], patch: { notes, tags } });
@@ -137,7 +151,7 @@ function Popup({ remote }: { remote: boolean }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('popupSearch')}
-            autoFocus
+            autoFocus={!starId}
             className="h-8 w-full rounded-lg border border-line bg-card pe-2 ps-8 text-[13px] outline-none focus:border-accent"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && hits[0]) void browser.tabs.create({ url: hits[0].url });
@@ -171,9 +185,15 @@ function Popup({ remote }: { remote: boolean }) {
         <p className="p-6 text-center text-sm text-muted">{t('popupNotPage')}</p>
       ) : lib ? (
         <div className="space-y-3 p-3">
+          {starId && existing && (
+            <div className="flex items-center gap-2 rounded-lg bg-ok/10 px-3 py-2 text-[13px] text-ok">
+              <Star className="size-4 fill-current" />
+              {t('starSavedTitle')} — {t('starSavedBody')}
+            </div>
+          )}
           <div className="flex items-center gap-2">
-            <Favicon url={tab!.url} size={20} remote={remote} />
-            <span className="ltr min-w-0 flex-1 truncate text-start text-xs text-muted">{hostOf(tab!.url)}</span>
+            <Favicon url={pageUrl} size={20} remote={remote} />
+            <span className="ltr min-w-0 flex-1 truncate text-start text-xs text-muted">{hostOf(pageUrl)}</span>
             {existing && (
               <>
                 <IconButton
@@ -182,16 +202,18 @@ function Popup({ remote }: { remote: boolean }) {
                 >
                   <Star className={cx('size-4', existing.rec.v.fav && 'fill-yellow-400 text-yellow-400')} />
                 </IconButton>
-                <IconButton
-                  label={t('popupCapture')}
-                  onClick={() =>
-                    void send({ type: 'capture', tabId: tab!.id, windowId: tab!.windowId, id: existing.id })
-                      .then(() => toast(t('done')))
-                      .catch((e) => toast(e.message, 'error'))
-                  }
-                >
-                  <Camera className="size-4" />
-                </IconButton>
+                {tab && (
+                  <IconButton
+                    label={t('popupCapture')}
+                    onClick={() =>
+                      void send({ type: 'capture', tabId: tab.id, windowId: tab.windowId, id: existing.id })
+                        .then(() => toast(t('done')))
+                        .catch((e) => toast(e.message, 'error'))
+                    }
+                  >
+                    <Camera className="size-4" />
+                  </IconButton>
+                )}
                 <IconButton
                   label={t('popupRemove')}
                   className="hover:text-danger"
@@ -209,7 +231,14 @@ function Popup({ remote }: { remote: boolean }) {
           </div>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="!h-9" />
           <FolderSelect tree={lib.tree} value={parent} onChange={setParent} />
-          <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('notesPlaceholder')} rows={3} className="!min-h-20 text-[13px]" />
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={t('notesPlaceholder')}
+            rows={3}
+            autoFocus={!!starId}
+            className="!min-h-20 text-[13px]"
+          />
           <TagInput value={tags} onChange={setTags} suggestions={lib.tags.map(([x]) => x)} placeholder={t('tagsPlaceholder')} />
           <div className="flex items-center gap-2 pt-1">
             <Button variant="primary" className="flex-1" loading={busy} icon={<BookmarkPlus className="size-4" />} onClick={() => void save()}>
