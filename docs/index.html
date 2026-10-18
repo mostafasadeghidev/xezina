@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xezina — your bookmarks, everywhere</title>
+<meta name="description" content="Free, open-source browser extension that syncs, organizes and searches your bookmarks across Chrome, Edge, Firefox and Brave using storage you own.">
+<link rel="icon" href="logo.png">
+<style>
+  :root { --bg:#0b0c0f; --panel:#121419; --line:#23262e; --fg:#eceef2; --muted:#949bab; --accent:#7c7cff; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f6f7f9; --panel:#fff; --line:#e4e7ec; --fg:#111827; --muted:#5b6170; --accent:#5b5bf0; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Vazirmatn, Tahoma, sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  header { display:flex; align-items:center; gap:12px; padding:22px 0; }
+  header img { width:36px; height:36px; }
+  header b { font-size:18px; }
+  header nav { margin-inline-start:auto; display:flex; gap:18px; font-size:14px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .hero { padding: 56px 0 40px; text-align: center; }
+  .hero h1 { font-size: clamp(32px, 6vw, 54px); line-height:1.1; margin:0 0 16px; letter-spacing:-.02em; }
+  .hero p { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0 auto 28px; }
+  .btn { display:inline-block; padding:12px 22px; border-radius:12px; background:var(--accent); color:#fff; font-weight:600; }
+  .btn.alt { background:transparent; color:var(--fg); border:1px solid var(--line); margin-inline-start:8px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; padding: 24px 0 48px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; }
+  .card h3 { margin:0 0 6px; font-size:16px; }
+  .card p { margin:0; color:var(--muted); font-size:14px; }
+  .chips { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin: 0 0 40px; }
+  .chips span { border:1px solid var(--line); border-radius:999px; padding:6px 14px; font-size:14px; background:var(--panel); }
+  footer { border-top:1px solid var(--line); padding:24px 0 40px; color:var(--muted); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; }
+  [dir=rtl] .btn.alt { margin-inline-start:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="logo.png" alt="">
+    <b>Xezina</b>
+    <nav>
+      <a href="https://github.com/mostafasadeghidev/xezina">GitHub</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="#fa" onclick="document.getElementById('fa').scrollIntoView();return false">فارسی</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Your bookmarks,<br>in every browser.</h1>
+    <p>Xezina keeps Chrome, Edge, Firefox and Brave in sync, and turns a thousand bookmarks into a searchable library with notes, tags and previews — stored in your own cloud, never on ours.</p>
+    <a class="btn" href="https://github.com/mostafasadeghidev/xezina/releases/latest">Download</a>
+    <a class="btn alt" href="https://github.com/mostafasadeghidev/xezina">Source code</a>
+  </section>
+
+  <div class="chips">
+    <span>Google Drive</span><span>Dropbox</span><span>OneDrive</span><span>Nextcloud / WebDAV</span><span>Cloudflare R2 / S3</span><span>GitHub</span>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>Real two-way sync</h3><p>Changes from different browsers are merged field by field. A rename here and a move there both survive.</p></div>
+    <div class="card"><h3>Find anything</h3><p>Search titles, addresses, your notes, tags and page descriptions — even from the address bar with <code>bm</code>.</p></div>
+    <div class="card"><h3>Notes, tags, previews</h3><p>Write why you saved a page, tag it, and see the site at a glance.</p></div>
+    <div class="card"><h3>Private by design</h3><p>No Xezina server. Optional end-to-end encryption with your passphrase.</p></div>
+    <div class="card"><h3>Safe</h3><p>Automatic backups before every sync, one-click restore, and a guard against mass deletion.</p></div>
+    <div class="card"><h3>8 languages</h3><p>English, فارسی, کوردی, العربية, Deutsch, Français, Italiano, Português.</p></div>
+  </div>
+
+  <section id="fa" dir="rtl" class="card" style="margin-bottom:48px">
+    <h3>Xezina به زبانِ ساده</h3>
+    <p>افزونه‌ای رایگان و متن‌باز که بوکمارک‌هایتان را بین Chrome، Edge، Firefox و Brave همگام نگه می‌دارد. با یادداشت، برچسب، پیش‌نمایش و جستجوی قوی، مرتب‌کردن و پیدا کردنِ هزاران بوکمارک را آسان می‌کند. اطلاعات فقط در فضای ذخیره‌سازیِ خودتان می‌ماند: Google Drive، Dropbox، OneDrive، Nextcloud، Cloudflare R2، ابرآروان یا GitHub.</p>
+  </section>
+
+  <footer>
+    <span>© 2026 Xezina · MIT License</span>
+    <a href="privacy.html">Privacy policy</a>
+    <a href="https://github.com/mostafasadeghidev/xezina/issues">Report a problem</a>
+  </footer>
+</div>
+</body>
+</html>

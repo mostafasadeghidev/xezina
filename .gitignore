@@ -1,0 +1,7 @@
+node_modules
+.output
+.wxt
+*.log
+.env*
+stats.html
+web-ext.config.ts
