@@ -26,7 +26,7 @@ import { pathOf, type TreeNode } from '../../core/tree';
 import { isRoot, ROOT } from '../../core/types';
 import { linkHealth } from '../../enrich/metadata';
 import { send } from '../../lib/messages';
-import { Favicon, FolderSelect, Preview, TagInput, useFolderName } from '../components/bits';
+import { Favicon, FolderSelect, Hl, Preview, SearchQuery, TagInput, useFolderName } from '../components/bits';
 import { Button, cx, Empty, IconButton, Input, Modal, Select, useConfirm, useToast } from '../components/ui';
 import { useStatus, type Library as Lib } from '../hooks';
 import { useI18n } from '../i18n';
@@ -234,6 +234,7 @@ export function LibraryView({
         </IconButton>
       </header>
 
+      <SearchQuery.Provider value={query}>
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[1400px] px-6 pb-24 pt-5">
           {/* heading */}
@@ -365,6 +366,8 @@ export function LibraryView({
           )}
         </div>
       </div>
+
+      </SearchQuery.Provider>
 
       {/* bulk actions */}
       {selected.size > 0 && (
@@ -519,11 +522,18 @@ function CardItem({
       <div className="flex min-h-0 flex-1 cursor-pointer flex-col gap-1.5 p-3" onClick={onOpen}>
         <div className="flex items-start gap-2">
           <Favicon url={node.url} remote={remote} />
-          <h3 dir="auto" className="line-clamp-2 min-w-0 flex-1 text-start text-[13.5px] font-semibold leading-snug">{displayTitle(node.title, node.url, v)}</h3>
+          <h3 dir="auto" className="line-clamp-2 min-w-0 flex-1 text-start text-[13.5px] font-semibold leading-snug"><Hl text={displayTitle(node.title, node.url, v)} />
+          </h3>
           <HealthDot node={node} />
         </div>
-        <div className="ltr truncate text-start text-xs text-muted">{hostOf(node.url)}</div>
-        {(v.notes || v.desc) && <p dir="auto" className="line-clamp-2 text-start text-xs leading-relaxed text-fg/70">{v.notes || v.desc}</p>}
+        <div className="ltr truncate text-start text-xs text-muted">
+          <Hl text={hostOf(node.url)} />
+        </div>
+        {(v.notes || v.desc) && (
+          <p dir="auto" className="line-clamp-2 text-start text-xs leading-relaxed text-fg/70">
+            <Hl text={v.notes || v.desc || ''} />
+          </p>
+        )}
         <div className="mt-auto flex flex-wrap items-center gap-1 pt-1">
           {showPath && parent && (
             <span className="inline-flex max-w-full items-center gap-1 truncate rounded-md bg-hover px-1.5 py-0.5 text-[11px] text-muted">
@@ -587,13 +597,21 @@ function Row({
       <button onClick={onOpen} className="min-w-0 flex-1 text-start">
         <div className="flex items-center gap-2">
           <span dir="auto" className={cx('truncate font-medium', compact ? 'text-[13px]' : 'text-[13.5px]')}>
-            {displayTitle(node.title, node.url, v)}
+            <Hl text={displayTitle(node.title, node.url, v)} />
           </span>
-          {compact && <span className="ltr hidden truncate text-xs text-muted sm:inline">{hostOf(node.url)}</span>}
+          {compact && (
+            <span className="ltr hidden truncate text-xs text-muted sm:inline">
+              <Hl text={hostOf(node.url)} />
+            </span>
+          )}
           {v.fav && <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />}
           <HealthDot node={node} />
         </div>
-        {!compact && <div className="truncate text-xs text-muted">{v.notes || <span className="ltr">{hostOf(node.url)}</span>}</div>}
+        {!compact && (
+          <div className="truncate text-xs text-muted">
+            {v.notes ? <Hl text={v.notes} /> : <span className="ltr"><Hl text={hostOf(node.url)} /></span>}
+          </div>
+        )}
       </button>
       <div className="hidden max-w-[30%] shrink-0 items-center gap-1 overflow-hidden md:flex">
         {(v.tags ?? []).slice(0, 3).map((tag) => (
@@ -735,7 +753,7 @@ function Tile({
           <Favicon url={node.url} size={icon} remote={remote} />
         </span>
         <span dir="auto" className="line-clamp-2 w-full text-[12px] font-medium leading-snug text-fg">
-          {displayTitle(node.title, node.url, v)}
+          <Hl text={displayTitle(node.title, node.url, v)} />
         </span>
       </a>
       <button

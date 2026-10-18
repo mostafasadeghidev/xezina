@@ -92,6 +92,7 @@ try {
   await sleep(400);
   const firstHit = await page.locator('[data-i="0"]').textContent();
   assert(/Docs|MDN/.test(firstHit ?? ''), `live suggestion found by note (${firstHit?.slice(0, 40)})`);
+  assert((await page.locator('[role=dialog] mark').count()) > 0, 'matched letters are highlighted');
   assert((await page.locator('text=Reference for HTML, CSS and JavaScript').count()) >= 1, 'preview pane shows the note');
   await page.screenshot({ path: path.join(SHOTS, 'f2-home-search.png') });
 
@@ -127,6 +128,28 @@ try {
   assert(Object.keys(notes).some((k) => k.startsWith('xz-saved:')), 'a "bookmark saved" notification was shown');
   all = await records(page);
   assert(all.some((r) => r.v.url === SITE && !r.v.del), 'starred page is in the library');
+
+  console.log('4b. popup: saved state and editing the address');
+  await sw.evaluate((u) => chrome.bookmarks.update, SITE);
+  const pop = await ctx.newPage();
+  await pop.setViewportSize({ width: 380, height: 600 });
+  await pop.goto(url('popup.html'));
+  await pop.waitForSelector('textarea', { timeout: 10000 });
+  await sleep(500);
+  const btn = pop.locator('button', { hasText: /^Saved$/ });
+  assert((await btn.count()) === 1 && (await btn.isDisabled()), 'unchanged bookmark shows a disabled "Saved" button');
+  await pop.screenshot({ path: path.join(SHOTS, 'f5-popup-saved.png') });
+  await pop.locator('input[dir=ltr]').fill(SITE + 'products/blue-shoe?id=7');
+  await pop.screenshot({ path: path.join(SHOTS, 'f6-popup-edit.png') });
+  assert((await pop.locator('button', { hasText: 'Save changes' }).count()) === 1, 'editing shows "Save changes"');
+  await pop.locator('button', { hasText: 'Site only' }).click();
+  assert((await pop.locator('input[dir=ltr]').inputValue()) === SITE, '"Site only" trims the address to the site');
+  await pop.locator('input[dir=ltr]').fill(SITE + 'shop/');
+  await pop.locator('button', { hasText: 'Save changes' }).click();
+  await sleep(1500);
+  const saved = await sw.evaluate(async () => (await chrome.bookmarks.search({ url: 'http://localhost:19879/shop/' })).length);
+  assert(saved === 1, 'the new address is saved to the browser bookmark');
+  assert(pop.isClosed(), 'opened after the star, the popup closes itself after saving');
 
   console.log('6. folder picker with live search');
   await sw.evaluate(async () => {

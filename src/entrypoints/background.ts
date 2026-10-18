@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
-import { buildTree } from '../core/tree';
+import { buildTree, pathOf } from '../core/tree';
+import { highlightRanges } from '../core/fuzzy';
 import { displayTitle } from '../core/normalize';
 import { buildIndex, searchIds } from '../core/search';
 import type { State } from '../core/types';
@@ -100,6 +101,18 @@ function escapeXml(s: string) {
   return s.replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]!);
 }
 
+/** Escaped text with the matched letters wrapped in <match> (Chrome's bold in the address bar). */
+function matchXml(text: string, query: string): string {
+  const ranges = highlightRanges(text, query);
+  let out = '';
+  let at = 0;
+  for (const [a, b] of ranges) {
+    out += escapeXml(text.slice(at, a)) + '<match>' + escapeXml(text.slice(a, b)) + '</match>';
+    at = b;
+  }
+  return out + escapeXml(text.slice(at));
+}
+
 function openManager(query = '') {
   const url = browser.runtime.getURL('/manager.html') + (query ? `#q=${encodeURIComponent(query)}` : '');
   void browser.tabs.create({ url });
@@ -194,7 +207,7 @@ export default defineBackground(() => {
   });
 
   // Address-bar search: type "bm" + space + words.
-  let index: { at: number; search: (q: string) => { id: string; title: string; url: string }[] } | null = null;
+  let index: { at: number; search: (q: string) => { id: string; title: string; url: string; folder: string }[] } | null = null;
   const getIndex = async () => {
     if (index && Date.now() - index.at < 30_000) return index;
     const all = await db.records.toArray();
@@ -205,7 +218,8 @@ export default defineBackground(() => {
       search: (q) =>
         searchIds(mini, q, 8).map((id) => {
           const n = tree.byId.get(id)!;
-          return { id, title: displayTitle(n.title, n.url, n.rec.v), url: n.url };
+          const path = pathOf(tree, id);
+          return { id, title: displayTitle(n.title, n.url, n.rec.v), url: n.url, folder: path[path.length - 1] ?? '' };
         }),
     };
     return index;
@@ -222,7 +236,10 @@ export default defineBackground(() => {
     suggest(
       hits.map((h) => ({
         content: h.url,
-        description: isFirefox ? `${h.title} — ${h.url}` : `${escapeXml(h.title)} <url>${escapeXml(h.url)}</url>`,
+        // 🔖 marks Xezina's suggestions; the letters that matched are bold.
+        description: isFirefox
+          ? `🔖 ${h.title} — ${h.url}`
+          : `🔖 ${matchXml(h.title, text)}${h.folder ? ` <dim>· ${escapeXml(h.folder)}</dim>` : ''} <url>${matchXml(h.url.replace(/^https?:\/\/(www\.)?/, ''), text)}</url>`,
       })),
     );
   });

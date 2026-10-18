@@ -1,5 +1,6 @@
 import MiniSearch from 'minisearch';
-import { foldText, hostOf } from './normalize';
+import { fuzzyMatch, prepare, queryWords, type Prepared } from './fuzzy';
+import { displayTitle, foldText, hostOf } from './normalize';
 import { pathOf, type Tree } from './tree';
 
 export interface SearchDoc {
@@ -53,17 +54,86 @@ export function docsFromTree(tree: Tree): SearchDoc[] {
   return docs;
 }
 
-export function buildIndex(tree: Tree): MiniSearch<SearchDoc> {
-  const index = createIndex();
-  index.addAll(docsFromTree(tree));
-  return index;
+interface Entry {
+  id: string;
+  name: Prepared;
+  host: Prepared;
+  url: Prepared;
+  /** Notes, tags, description and folder names, letters only (substring search). */
+  extra: string;
 }
 
-/** Searches; falls back to OR when AND finds nothing. */
-export function searchIds(index: MiniSearch<SearchDoc>, query: string, limit = 500): string[] {
-  const q = query.trim();
-  if (!q) return [];
-  let hits = index.search(q);
-  if (!hits.length) hits = index.search(q, { combineWith: 'OR' });
-  return hits.slice(0, limit).map((h) => h.id as string);
+/**
+ * Two searches combined: word search (MiniSearch: whole words, prefixes,
+ * small typos, relevance across fields) and fuzzy letter matching on the
+ * name and address ("checkhost" → "check-host.net").
+ */
+export class Searcher {
+  private mini = createIndex();
+  private entries: Entry[] = [];
+
+  constructor(tree: Tree) {
+    const docs = docsFromTree(tree);
+    this.mini.addAll(docs);
+    for (const d of docs) {
+      const n = tree.byId.get(d.id)!;
+      this.entries.push({
+        id: d.id,
+        name: prepare(displayTitle(n.title, n.url, n.rec.v) + ' ' + [n.title, n.rec.v.siteTitle].filter(Boolean).join(' ')),
+        host: prepare(hostOf(n.url)),
+        url: prepare(n.url.replace(/^https?:\/\/(www\.)?[^/]+/, '')),
+        extra: prepare([d.notes, d.tags, d.desc, d.path].join(' ')).text,
+      });
+    }
+  }
+
+  search(query: string, limit = 500): { id: string; score: number }[] {
+    const words = queryWords(query);
+    if (!words.length) return [];
+    const scores = new Map<string, number>();
+
+    // Word search: strong when whole words match; normalised to 0..240.
+    let hits = this.mini.search(query);
+    if (!hits.length) hits = this.mini.search(query, { combineWith: 'OR' });
+    const top = hits[0]?.score ?? 1;
+    for (const h of hits) scores.set(h.id as string, (240 * h.score) / top);
+
+    // Letter matching on name / site / address.
+    const all = words.join('');
+    for (const e of this.entries) {
+      const field = (w: string) =>
+        Math.max(
+          fuzzyMatch(w, e.name)?.score ?? 0,
+          (fuzzyMatch(w, e.host)?.score ?? 0) * 0.9,
+          (fuzzyMatch(w, e.url)?.score ?? 0) * 0.5,
+          w.length > 1 && e.extra.includes(w) ? 60 + w.length * 6 : 0,
+        );
+      let fuzzy = words.length > 1 ? field(all) : 0;
+      let each = 0;
+      for (const w of words) {
+        const s = field(w);
+        if (!s) {
+          each = 0;
+          break;
+        }
+        each += s;
+      }
+      fuzzy = Math.max(fuzzy, each / words.length);
+      if (fuzzy > 0) scores.set(e.id, (scores.get(e.id) ?? 0) + fuzzy);
+    }
+
+    return [...scores]
+      .map(([id, score]) => ({ id, score }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+  }
+}
+
+export function buildIndex(tree: Tree): Searcher {
+  return new Searcher(tree);
+}
+
+/** Best-first ids for a query. */
+export function searchIds(index: Searcher, query: string, limit = 500): string[] {
+  return index.search(query, limit).map((h) => h.id);
 }

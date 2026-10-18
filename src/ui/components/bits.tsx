@@ -1,5 +1,6 @@
 import { Check, ChevronDown, Folder, Search, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { highlightRanges } from '../../core/fuzzy';
 import { foldText, hostOf, uniqueTags } from '../../core/normalize';
 import type { Tree, TreeNode } from '../../core/tree';
 import { isRoot, ROOT } from '../../core/types';
@@ -345,4 +346,28 @@ export function FolderSelect({
       </div>
     </div>
   );
+}
+
+/** The text being searched for; result lists highlight it. */
+export const SearchQuery = createContext('');
+
+/** Text with the letters that matched the current search highlighted. */
+export function Hl({ text, query }: { text: string; query?: string }) {
+  const ctx = useContext(SearchQuery);
+  const q = query ?? ctx;
+  const ranges = useMemo(() => (q.trim() ? highlightRanges(text, q) : []), [text, q]);
+  if (!ranges.length) return <>{text}</>;
+  const out: ReactNode[] = [];
+  let at = 0;
+  ranges.forEach(([a, b], i) => {
+    if (a > at) out.push(text.slice(at, a));
+    out.push(
+      <mark key={i} className="rounded-[3px] bg-accent/20 font-bold text-inherit">
+        {text.slice(a, b)}
+      </mark>,
+    );
+    at = b;
+  });
+  if (at < text.length) out.push(text.slice(at));
+  return <>{out}</>;
 }

@@ -1,4 +1,4 @@
-import { BookmarkPlus, Camera, ExternalLink, LayoutDashboard, Search, Star, Trash2 } from 'lucide-react';
+import { BookmarkPlus, Camera, Check, ExternalLink, LayoutDashboard, Search, Star, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { displayTitle, hostOf, normalizeUrl } from '../../core/normalize';
@@ -6,7 +6,7 @@ import { searchIds } from '../../core/search';
 import { ROOT } from '../../core/types';
 import { db } from '../../db/db';
 import { send } from '../../lib/messages';
-import { Favicon, FolderSelect, TagInput, useFolderName } from '../components/bits';
+import { Favicon, FolderSelect, Hl, TagInput, useFolderName } from '../components/bits';
 import { Button, cx, IconButton, Input, Textarea, ToastProvider, useToast } from '../components/ui';
 import { useLibrary, useRecords, useSettings, useTheme } from '../hooks';
 import { I18nProvider, LANGUAGES, resolveLang, useI18n } from '../i18n';
@@ -47,6 +47,7 @@ function Popup({ remote }: { remote: boolean }) {
   const [tab, setTab] = useState<TabInfo | null>(null);
   const [query, setQuery] = useState('');
   const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [parent, setParent] = useState<string>(() => {
@@ -87,11 +88,13 @@ function Popup({ remote }: { remote: boolean }) {
   useEffect(() => {
     if (existing) {
       setTitle(existing.title);
+      setUrl(existing.url);
       setNotes(existing.rec.v.notes ?? '');
       setTags(existing.rec.v.tags ?? []);
       setParent(existing.parent);
     } else if (tab) {
       setTitle(tab.title);
+      setUrl(tab.url);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existing?.id, tab]);
@@ -103,7 +106,23 @@ function Popup({ remote }: { remote: boolean }) {
       .filter(Boolean);
   }, [lib, query]);
 
-  const pageUrl = existing?.url ?? tab?.url ?? '';
+  const pageUrl = url || existing?.url || tab?.url || '';
+  // Unchanged since it was saved: the button says so.
+  const dirty =
+    !existing ||
+    title !== existing.title ||
+    url.trim() !== existing.url ||
+    notes !== (existing.rec.v.notes ?? '') ||
+    parent !== existing.parent ||
+    JSON.stringify(tags) !== JSON.stringify(existing.rec.v.tags ?? []);
+  const siteRoot = (() => {
+    try {
+      const u = new URL(url.trim());
+      return /^https?:$/.test(u.protocol) ? `${u.origin}/` : '';
+    } catch {
+      return '';
+    }
+  })();
   const bookmarkable = !!existing || (!!tab && /^(https?|ftp|file):/i.test(tab.url));
 
   const save = async () => {
@@ -111,14 +130,19 @@ function Popup({ remote }: { remote: boolean }) {
     setBusy(true);
     try {
       if (existing) {
-        if (title !== existing.title) await send({ type: 'edit', id: existing.id, title });
+        const newUrl = url.trim();
+        if (title !== existing.title || (newUrl && newUrl !== existing.url))
+          await send({ type: 'edit', id: existing.id, title, url: newUrl && newUrl !== existing.url ? newUrl : undefined });
+        // Keep showing this bookmark even if its address no longer matches the tab.
+        setNewId(existing.id);
         await send({ type: 'meta', ids: [existing.id], patch: { notes, tags } });
         if (parent !== existing.parent) await send({ type: 'move', ids: [existing.id], parent });
         toast(t('saved'));
         // Opened by the star: done after saving.
         if (starId) setTimeout(() => window.close(), 600);
       } else {
-        const id = await send<string | null>({ type: 'create', parent, title: title || tab!.url, url: tab!.url });
+        const target = url.trim() || tab!.url;
+        const id = await send<string | null>({ type: 'create', parent, title: title || target, url: target });
         if (id) {
           setNewId(id);
           if (notes || tags.length) await send({ type: 'meta', ids: [id], patch: { notes, tags } });
@@ -172,8 +196,12 @@ function Popup({ remote }: { remote: boolean }) {
             <a key={h.id} href={h.url} target="_blank" rel="noreferrer" className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 hover:bg-hover">
               <Favicon url={h.url} remote={remote} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium">{displayTitle(h.title, h.url, h.rec.v)}</span>
-                <span className="block truncate text-[11px] text-muted">{h.rec.v.notes || hostOf(h.url)}</span>
+                <span dir="auto" className="block truncate text-[13px] font-medium">
+                  <Hl text={displayTitle(h.title, h.url, h.rec.v)} query={query} />
+                </span>
+                <span className="block truncate text-[11px] text-muted">
+                  <Hl text={h.rec.v.notes || hostOf(h.url)} query={query} />
+                </span>
               </span>
             </a>
           ))}
@@ -190,7 +218,7 @@ function Popup({ remote }: { remote: boolean }) {
           {starId && existing && (
             <div className="flex items-center gap-2 rounded-lg bg-ok/10 px-3 py-2 text-[13px] text-ok">
               <Star className="size-4 fill-current" />
-              {t('starSavedTitle')} — {t('starSavedBody')}
+              {t('starSavedTitle')}
             </div>
           )}
           <div className="flex items-center gap-2">
@@ -231,7 +259,15 @@ function Popup({ remote }: { remote: boolean }) {
               </>
             )}
           </div>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="!h-9" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="!h-9" dir="auto" />
+          <div className="flex gap-1.5">
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} className="!h-9 text-[12.5px]" dir="ltr" spellCheck={false} />
+            {siteRoot && siteRoot !== url.trim() && (
+              <Button size="sm" className="!h-9 shrink-0" onClick={() => setUrl(siteRoot)} title={siteRoot}>
+                {t('siteOnly')}
+              </Button>
+            )}
+          </div>
           <FolderSelect tree={lib.tree} value={parent} onChange={setParent} />
           <Textarea
             value={notes}
@@ -243,8 +279,15 @@ function Popup({ remote }: { remote: boolean }) {
           />
           <TagInput value={tags} onChange={setTags} suggestions={lib.tags.map(([x]) => x)} placeholder={t('tagsPlaceholder')} />
           <div className="flex items-center gap-2 pt-1">
-            <Button variant="primary" className="flex-1" loading={busy} icon={<BookmarkPlus className="size-4" />} onClick={() => void save()}>
-              {existing ? t('save') : t('popupSave')}
+            <Button
+              variant="primary"
+              className={cx('flex-1', !dirty && '!bg-ok/15 !text-ok !shadow-none')}
+              loading={busy}
+              disabled={!dirty}
+              icon={!dirty ? <Check className="size-4" /> : <BookmarkPlus className="size-4" />}
+              onClick={() => void save()}
+            >
+              {!dirty ? t('savedState') : existing ? t('saveChanges') : t('popupSave')}
             </Button>
             {existing && (
               <Button onClick={() => openManager()} icon={<ExternalLink className="size-4" />}>

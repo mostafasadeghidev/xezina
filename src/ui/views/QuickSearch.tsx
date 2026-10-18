@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { displayTitle, hostOf } from '../../core/normalize';
 import { searchIds } from '../../core/search';
 import type { TreeNode } from '../../core/tree';
-import { Favicon, Preview, useFolderName } from '../components/bits';
+import { Favicon, Hl, Preview, useFolderName } from '../components/bits';
 import { Button, cx } from '../components/ui';
 import type { Library } from '../hooks';
 import { useI18n } from '../i18n';
@@ -125,9 +125,11 @@ export function QuickSearch({
                   <Favicon url={n.url} size={20} remote={remote} />
                   <span className="min-w-0 flex-1">
                     <span dir="auto" className={cx('block truncate text-sm font-medium', i === active && 'text-accent')}>
-                      {displayTitle(n.title, n.url, n.rec.v)}
+                      <Hl text={displayTitle(n.title, n.url, n.rec.v)} query={query} />
                     </span>
-                    <span className="block truncate text-xs text-muted">{n.rec.v.notes || <span className="ltr">{hostOf(n.url)}</span>}</span>
+                    <span className="block truncate text-xs text-muted">
+                      {n.rec.v.notes ? <Hl text={n.rec.v.notes} query={query} /> : <span className="ltr"><Hl text={hostOf(n.url)} query={query} /></span>}
+                    </span>
                   </span>
                   {n.rec.v.fav && <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />}
                 </button>
