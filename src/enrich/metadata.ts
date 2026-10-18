@@ -152,3 +152,68 @@ export function linkHealth(
   if (status === 404 || status === 410) return 'broken';
   return 'blocked';
 }
+
+export type FixKind = 'moved' | 'parent' | 'root' | '';
+
+const LOGINISH = /(log-?in|sign-?in|auth|account\/login|session)/i;
+
+/** "The same page" for redirect purposes: scheme, www, trailing slash and case don't count. */
+function samePage(a: string, b: string): boolean {
+  const norm = (u: string) => {
+    try {
+      const x = new URL(u);
+      return (x.hostname.replace(/^www\./, '') + x.pathname.replace(/\/+$/, '') + x.search).toLowerCase();
+    } catch {
+      return u;
+    }
+  };
+  return norm(a) === norm(b);
+}
+
+/** Addresses above a URL, nearest first: /a/b/c?x → /a/b/c, /a/b/, /a/, / */
+export function parentUrls(url: string): string[] {
+  try {
+    const u = new URL(url);
+    const out: string[] = [];
+    if (u.search || u.hash) out.push(u.origin + u.pathname);
+    const parts = u.pathname.split('/').filter(Boolean);
+    for (let i = parts.length - 1; i >= 0; i--) out.push(u.origin + '/' + parts.slice(0, i).join('/') + (i ? '/' : ''));
+    return [...new Set(out)].filter((x) => !samePage(x, url)).slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
+function isRootUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return (u.pathname === '/' || u.pathname === '') && !u.search;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * What to suggest for a bookmark after a check:
+ *  - the page answered after redirecting somewhere else → "moved"
+ *    (to the site's home page counts as "the page is gone, the site works")
+ *  - the page is gone (404/410) → the nearest working parent address
+ */
+export async function findFix(url: string, info: PageInfo, fetcher = fetchPage): Promise<{ url: string; kind: FixKind }> {
+  const ok = info.status >= 200 && info.status < 400;
+  if (ok) {
+    const final = info.finalUrl;
+    if (!final || samePage(final, url) || LOGINISH.test(new URL(final).pathname)) return { url: '', kind: '' };
+    if (isRootUrl(final) && !isRootUrl(url)) return { url: final, kind: 'root' };
+    return { url: final, kind: 'moved' };
+  }
+  if (info.status !== 404 && info.status !== 410) return { url: '', kind: '' };
+  for (const candidate of parentUrls(url)) {
+    const r = await fetcher(candidate, 10_000);
+    if (r.status >= 200 && r.status < 400 && !LOGINISH.test(r.finalUrl)) {
+      const target = r.finalUrl || candidate;
+      return { url: target, kind: isRootUrl(target) ? 'root' : 'parent' };
+    }
+  }
+  return { url: '', kind: '' };
+}

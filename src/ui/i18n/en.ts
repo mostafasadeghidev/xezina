@@ -286,6 +286,14 @@ export const en = {
   useThisView: "Use this view",
   openInWindow: "Open in a window instead",
   liveLoading: "Loading the site…",
+  brokenHint: "Xezina checks each bookmark and, when a page is gone, looks for the nearest address on the same site that still works.",
+  brokenSiteOk: "The page is gone, but the site works",
+  brokenMoved: "Moved to a new address",
+  brokenGone: "Nothing found on the site",
+  useSuggestion: "Use this address",
+  fixAll: "Fix all ({n})",
+  fixAllConfirm: "Change the address of {n} bookmarks to the suggested ones? A backup is made first.",
+  archived: "Archived copy",
 };
 
 export type Strings = typeof en;

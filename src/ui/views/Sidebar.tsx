@@ -23,7 +23,7 @@ import { useFolderName } from '../components/bits';
 import { cx, useToast } from '../components/ui';
 import type { Library } from '../hooks';
 import { useI18n } from '../i18n';
-import { routeOf, type Filter } from '../library';
+import { needsFixing, routeOf, type Filter } from '../library';
 import { SyncPill } from './SyncPill';
 import { Logo } from './Logo';
 
@@ -219,7 +219,7 @@ export function Sidebar({
         <Item
           icon={<AlertTriangle className="size-4" />}
           label={t('navBroken')}
-          count={lib.bookmarks.filter((b) => linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken').length}
+          count={lib.bookmarks.filter(needsFixing).length}
           active={is('broken')}
           onClick={() => go('/library/broken')}
         />

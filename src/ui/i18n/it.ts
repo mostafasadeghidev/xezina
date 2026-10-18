@@ -287,4 +287,12 @@ export const it: Strings = {
   useThisView: "Usa questa vista",
   openInWindow: "Apri invece in una finestra",
   liveLoading: "Caricamento del sito…",
+  brokenHint: "Xezina controlla ogni segnalibro e, se una pagina non c’è più, cerca l’indirizzo più vicino dello stesso sito che funziona ancora.",
+  brokenSiteOk: "La pagina non c’è più, ma il sito funziona",
+  brokenMoved: "Spostata a un nuovo indirizzo",
+  brokenGone: "Niente trovato sul sito",
+  useSuggestion: "Usa questo indirizzo",
+  fixAll: "Correggi tutti ({n})",
+  fixAllConfirm: "Cambiare l’indirizzo di {n} segnalibri con quelli suggeriti? Prima viene fatto un backup.",
+  archived: "Copia archiviata",
 };

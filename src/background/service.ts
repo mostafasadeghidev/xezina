@@ -6,7 +6,7 @@ import { buildTree } from '../core/tree';
 import { isRoot, type FieldValues, type Rec, type State } from '../core/types';
 import { db, DEFAULT_STATUS, kvGet, kvSet, loadDevice, saveDevice, type EnrichStatus, type SyncStatus } from '../db/db';
 import { dataUrlToBlob, downloadImage, hashBlob, makePreview } from '../enrich/images';
-import { fetchPage, isProtectedPage } from '../enrich/metadata';
+import { fetchPage, findFix, isProtectedPage } from '../enrich/metadata';
 import { getSettings, guessDeviceName, saveSettings, type Settings } from '../lib/settings';
 import { ensureRepo, githubDevicePoll, githubDeviceStart, githubUser, type DeviceCode } from '../storage/github';
 import { BUILT_IN_CLIENT_IDS, signIn, tokenSource } from '../storage/oauth';
@@ -431,8 +431,9 @@ async function enrichOne(rec: Rec, s: Settings, refresh = false): Promise<Refres
     }
   }
   const reached = info.status > 0 && info.status < 400;
+  const fix = await findFix(rec.v.url as string, info).catch(() => ({ url: '', kind: '' as const }));
   await mutate([rec.id], (r, clock) => {
-    const patch: Partial<FieldValues> = { status: info.status, checkedAt: Date.now() };
+    const patch: Partial<FieldValues> = { status: info.status, checkedAt: Date.now(), fixUrl: fix.url, fixKind: fix.kind };
     if (info.desc && (refresh || !r.v.desc)) patch.desc = info.desc;
     if (img && (refresh || !r.v.img)) {
       patch.img = img;

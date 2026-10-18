@@ -287,4 +287,12 @@ export const de: Strings = {
   useThisView: "Diese Ansicht verwenden",
   openInWindow: "Stattdessen in Fenster öffnen",
   liveLoading: "Website wird geladen…",
+  brokenHint: "Xezina prüft jedes Lesezeichen und sucht bei fehlenden Seiten die nächste noch funktionierende Adresse derselben Website.",
+  brokenSiteOk: "Seite weg, Website funktioniert",
+  brokenMoved: "An neue Adresse umgezogen",
+  brokenGone: "Auf der Website nichts gefunden",
+  useSuggestion: "Diese Adresse verwenden",
+  fixAll: "Alle korrigieren ({n})",
+  fixAllConfirm: "Die Adresse von {n} Lesezeichen auf die vorgeschlagenen ändern? Vorher wird gesichert.",
+  archived: "Archivkopie",
 };

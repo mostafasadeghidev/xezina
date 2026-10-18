@@ -60,7 +60,7 @@ export function select(lib: Library, filter: Filter, query: string, sort: Sort):
       break;
     }
     case 'broken':
-      items = lib.bookmarks.filter((b) => linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken');
+      items = lib.bookmarks.filter(needsFixing);
       break;
     case 'untagged':
       items = lib.bookmarks.filter((b) => !(b.rec.v.tags ?? []).length);
@@ -152,4 +152,9 @@ export function pickKeeper(lib: Library, ids: string[]): string {
     const tb = lib.tree.byId.get(b)?.rec.v.addedAt ?? Infinity;
     return ta - tb || (a < b ? -1 : 1);
   })[0];
+}
+
+/** Shown under "Broken links": a missing page, or one that now lives at another address. */
+export function needsFixing(b: TreeNode): boolean {
+  return linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken' || !!(b.rec.v.fixUrl && b.rec.v.fixKind);
 }

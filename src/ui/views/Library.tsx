@@ -34,6 +34,7 @@ import { useI18n } from '../i18n';
 import { routeOf, select, type Filter, type Sort } from '../library';
 import { DRAG_TYPE } from './Sidebar';
 import { Duplicates } from './Duplicates';
+import { BrokenLinks } from './BrokenLinks';
 
 type ViewMode = 'grid' | 'tiles' | 'list' | 'compact';
 /** Minimum card / tile widths for the five size steps. */
@@ -287,18 +288,6 @@ export function LibraryView({
               </div>
               <p className="mt-0.5 text-sm text-muted">{t('results', { n: items.length })}</p>
             </div>
-            {filter.kind === 'broken' && items.length > 0 && (
-              <Button
-                size="sm"
-                icon={<RefreshCw className="size-3.5" />}
-                onClick={() => {
-                  void send({ type: 'enrich', ids: items.map((i) => i.id) });
-                  toast(t('previewsProgress'));
-                }}
-              >
-                {t('recheckAll')}
-              </Button>
-            )}
             {items.length > 0 && (
               <button
                 className="shrink-0 text-xs text-muted hover:text-fg"
@@ -318,7 +307,9 @@ export function LibraryView({
             </div>
           )}
 
-          {filter.kind === 'dups' && !query.trim() && items.length > 0 ? (
+          {filter.kind === 'broken' && !query.trim() && items.length > 0 ? (
+            <BrokenLinks items={items} openDetails={openDetails} remote={remote} />
+          ) : filter.kind === 'dups' && !query.trim() && items.length > 0 ? (
             <Duplicates lib={lib} selected={selected} setSelected={setSelected} openDetails={openDetails} remote={remote} />
           ) : items.length === 0 ? (
             query ? (

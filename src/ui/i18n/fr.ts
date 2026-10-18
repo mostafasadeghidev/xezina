@@ -287,4 +287,12 @@ export const fr: Strings = {
   useThisView: "Utiliser cette vue",
   openInWindow: "Ouvrir plutôt dans une fenêtre",
   liveLoading: "Chargement du site…",
+  brokenHint: "Xezina vérifie chaque favori et, si une page a disparu, cherche l’adresse la plus proche du même site qui fonctionne encore.",
+  brokenSiteOk: "La page a disparu, mais le site fonctionne",
+  brokenMoved: "Déplacée à une nouvelle adresse",
+  brokenGone: "Rien trouvé sur le site",
+  useSuggestion: "Utiliser cette adresse",
+  fixAll: "Tout corriger ({n})",
+  fixAllConfirm: "Remplacer l’adresse de {n} favoris par celles suggérées ? Une sauvegarde est faite avant.",
+  archived: "Copie archivée",
 };

@@ -42,6 +42,10 @@ export interface FieldValues {
   status: number;
   /** When the page was last fetched for metadata / link check (ms). */
   checkedAt: number;
+  /** A working address to use instead, found by the link checker. */
+  fixUrl: string;
+  /** Why: the page moved, or it is gone but a parent page / the site works. */
+  fixKind: 'moved' | 'parent' | 'root' | '';
 }
 
 export type FieldName = keyof FieldValues;
