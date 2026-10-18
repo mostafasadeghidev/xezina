@@ -233,6 +233,18 @@ export function LibraryView({
               </div>
               <p className="mt-0.5 text-sm text-muted">{t('results', { n: items.length })}</p>
             </div>
+            {filter.kind === 'broken' && items.length > 0 && (
+              <Button
+                size="sm"
+                icon={<RefreshCw className="size-3.5" />}
+                onClick={() => {
+                  void send({ type: 'enrich', ids: items.map((i) => i.id) });
+                  toast(t('previewsProgress'));
+                }}
+              >
+                {t('recheckAll')}
+              </Button>
+            )}
             {items.length > 0 && (
               <button
                 className="shrink-0 text-xs text-muted hover:text-fg"

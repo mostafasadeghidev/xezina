@@ -96,7 +96,10 @@ describe('link health', () => {
     expect(isProtectedPage('https://microsoftedge.microsoft.com/addons/detail/x')).toBe(true);
     expect(isProtectedPage('https://google.com/')).toBe(false);
     expect(linkHealth(0, Date.now(), store)).toBe('blocked');
-    expect(linkHealth(0, Date.now(), 'https://gone.example/')).toBe('broken');
+    expect(linkHealth(404, Date.now(), 'https://gone.example/')).toBe('broken');
+    expect(linkHealth(0, Date.now(), 'https://filtered.example/')).toBe('blocked');
+    expect(linkHealth(503, Date.now(), 'https://busy.example/')).toBe('blocked');
+    expect(linkHealth(500, Date.now(), 'https://busy.example/')).toBe('blocked');
     expect(linkHealth(200, Date.now(), 'https://ok.example/')).toBe('ok');
   });
 });

@@ -59,7 +59,16 @@ export function parseHead(html: string, baseUrl: string): Omit<PageInfo, 'status
   return { title: title.slice(0, 300), desc: desc.slice(0, 600), image: abs };
 }
 
-export async function fetchPage(url: string, timeout = 15_000): Promise<PageInfo> {
+/** Fetches a page; a network error, timeout or server error is retried once. */
+export async function fetchPage(url: string, timeout = 20_000): Promise<PageInfo> {
+  const first = await fetchOnce(url, timeout);
+  if (first.status !== 0 && first.status < 500) return first;
+  await new Promise((r) => setTimeout(r, 3000));
+  const second = await fetchOnce(url, timeout);
+  return second.status !== 0 && second.status < 500 ? second : first.status ? first : second;
+}
+
+async function fetchOnce(url: string, timeout: number): Promise<PageInfo> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
   try {
@@ -137,6 +146,9 @@ export function linkHealth(
   if (!checkedAt) return 'unknown';
   if (status === undefined) return 'unknown';
   if (status >= 200 && status < 400) return 'ok';
-  if (status === 0 || status === 404 || status === 410 || (status >= 500 && status !== 503)) return 'broken';
+  // Only the site itself saying "this page does not exist" counts as broken.
+  // Timeouts, network errors (filtering, VPN off), bot protection and server
+  // errors are often temporary or local, so they are "could not verify".
+  if (status === 404 || status === 410) return 'broken';
   return 'blocked';
 }
