@@ -265,6 +265,9 @@ export const en = {
   folderSearch: "Search folders…",
   recentFolders: "Recent",
   allFolders: "All folders",
+  viewTiles: "Tiles",
+  viewCompact: "Compact list",
+  cardSize: "Size",
 };
 
 export type Strings = typeof en;

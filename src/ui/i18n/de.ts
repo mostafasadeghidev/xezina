@@ -266,4 +266,7 @@ export const de: Strings = {
   folderSearch: "Ordner suchen…",
   recentFolders: "Zuletzt",
   allFolders: "Alle Ordner",
+  viewTiles: "Kacheln",
+  viewCompact: "Kompakte Liste",
+  cardSize: "Größe",
 };

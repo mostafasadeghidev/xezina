@@ -266,4 +266,7 @@ export const fr: Strings = {
   folderSearch: "Rechercher un dossier…",
   recentFolders: "Récents",
   allFolders: "Tous les dossiers",
+  viewTiles: "Vignettes",
+  viewCompact: "Liste compacte",
+  cardSize: "Taille",
 };

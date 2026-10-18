@@ -266,4 +266,7 @@ export const it: Strings = {
   folderSearch: "Cerca cartelle…",
   recentFolders: "Recenti",
   allFolders: "Tutte le cartelle",
+  viewTiles: "Riquadri",
+  viewCompact: "Elenco compatto",
+  cardSize: "Dimensione",
 };

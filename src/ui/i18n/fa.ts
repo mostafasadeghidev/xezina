@@ -266,4 +266,7 @@ export const fa: Strings = {
   folderSearch: "جستجوی پوشه‌ها…",
   recentFolders: "اخیر",
   allFolders: "همهٔ پوشه‌ها",
+  viewTiles: "کاشی",
+  viewCompact: "فهرستِ فشرده",
+  cardSize: "اندازه",
 };

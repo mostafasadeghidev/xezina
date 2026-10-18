@@ -266,4 +266,7 @@ export const pt: Strings = {
   folderSearch: "Pesquisar pastas…",
   recentFolders: "Recentes",
   allFolders: "Todas as pastas",
+  viewTiles: "Blocos",
+  viewCompact: "Lista compacta",
+  cardSize: "Tamanho",
 };

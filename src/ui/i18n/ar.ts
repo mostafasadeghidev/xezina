@@ -266,4 +266,7 @@ export const ar: Strings = {
   folderSearch: "ابحث في المجلدات…",
   recentFolders: "الأخيرة",
   allFolders: "كل المجلدات",
+  viewTiles: "مربعات",
+  viewCompact: "قائمة مضغوطة",
+  cardSize: "الحجم",
 };

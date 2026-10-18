@@ -266,4 +266,7 @@ export const ckb: Strings = {
   folderSearch: "گەڕان لە بوخچەکان…",
   recentFolders: "دوایین",
   allFolders: "هەموو بوخچەکان",
+  viewTiles: "خانە",
+  viewCompact: "لیستی چڕ",
+  cardSize: "قەبارە",
 };

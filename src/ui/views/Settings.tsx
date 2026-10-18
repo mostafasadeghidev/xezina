@@ -54,7 +54,7 @@ export function SettingsView({ tab, go, lib }: { tab: string; go: (r: string) =>
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-4xl px-6 py-8">
         <h1 className="text-2xl font-bold tracking-tight">{t('settingsTitle')}</h1>
-        <div className="mt-5 flex gap-1 overflow-x-auto border-b border-line">
+        <div className="mt-5 flex flex-wrap gap-x-1 border-b border-line">
           {TABS.map((k) => (
             <button
               key={k}

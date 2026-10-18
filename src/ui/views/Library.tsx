@@ -4,7 +4,11 @@ import {
   Check,
   Folder,
   FolderInput,
+  AlignJustify,
+  Grid3x3,
   LayoutGrid,
+  ZoomIn,
+  ZoomOut,
   List,
   Pencil,
   Plus,
@@ -29,6 +33,11 @@ import { useI18n } from '../i18n';
 import { routeOf, select, type Filter, type Sort } from '../library';
 import { DRAG_TYPE } from './Sidebar';
 import { Duplicates } from './Duplicates';
+
+type ViewMode = 'grid' | 'tiles' | 'list' | 'compact';
+/** Minimum card / tile widths for the five size steps. */
+const CARD_SIZES = [170, 205, 240, 290, 350];
+const TILE_SIZES = [92, 108, 126, 150, 180];
 
 function loadPref<T>(key: string, fallback: T): T {
   try {
@@ -70,7 +79,8 @@ export function LibraryView({
   const confirm = useConfirm();
   const name = useFolderName();
   const status = useStatus();
-  const [mode, setMode] = useState<'grid' | 'list'>(() => loadPref('mode', 'grid'));
+  const [mode, setMode] = useState<ViewMode>(() => loadPref('mode', 'grid'));
+  const [size, setSize] = useState<number>(() => loadPref('size', 3));
   const [sort, setSort] = useState<Sort>(() => loadPref('sort', 'manual'));
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [moving, setMoving] = useState(false);
@@ -80,6 +90,7 @@ export function LibraryView({
 
   useEffect(() => savePref('mode', mode), [mode]);
   useEffect(() => savePref('sort', sort), [sort]);
+  useEffect(() => savePref('size', size), [size]);
   useEffect(() => setSelected(new Set()), [filter]);
 
   useEffect(() => {
@@ -178,10 +189,32 @@ export function LibraryView({
           <IconButton label={t('viewGrid')} active={mode === 'grid'} onClick={() => setMode('grid')} className="size-8">
             <LayoutGrid className="size-4" />
           </IconButton>
+          <IconButton label={t('viewTiles')} active={mode === 'tiles'} onClick={() => setMode('tiles')} className="size-8">
+            <Grid3x3 className="size-4" />
+          </IconButton>
           <IconButton label={t('viewList')} active={mode === 'list'} onClick={() => setMode('list')} className="size-8">
             <List className="size-4" />
           </IconButton>
+          <IconButton label={t('viewCompact')} active={mode === 'compact'} onClick={() => setMode('compact')} className="size-8">
+            <AlignJustify className="size-4" />
+          </IconButton>
         </div>
+        {(mode === 'grid' || mode === 'tiles') && (
+          <label className="flex items-center gap-2 text-muted" title={t('cardSize')}>
+            <ZoomOut className="size-4 shrink-0" />
+            <input
+              type="range"
+              min={1}
+              max={5}
+              step={1}
+              value={size}
+              onChange={(e) => setSize(Number(e.target.value))}
+              aria-label={t('cardSize')}
+              className="w-24 accent-[var(--accent)]"
+            />
+            <ZoomIn className="size-4 shrink-0" />
+          </label>
+        )}
         <Select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="!w-auto">
           <option value="manual">{t('sortManual')}</option>
           <option value="newest">{t('sortNewest')}</option>
@@ -280,8 +313,24 @@ export function LibraryView({
             ) : subfolders.length === 0 ? (
               <Empty icon={<Folder className="size-6" />} title={t('emptyFolder')} />
             ) : null
+          ) : mode === 'tiles' ? (
+            <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_SIZES[size - 1]}px, 1fr))` }}>
+              {items.map((n) => (
+                <Tile
+                  key={n.id}
+                  node={n}
+                  remote={remote}
+                  size={size}
+                  selected={selected.has(n.id)}
+                  selecting={selected.size > 0}
+                  onSelect={() => toggle(n.id)}
+                  onOpen={() => openDetails(n.id)}
+                  onDragStart={(e) => onDragStart(e, n.id)}
+                />
+              ))}
+            </div>
           ) : mode === 'grid' ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4">
+            <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${CARD_SIZES[size - 1]}px, 1fr))` }}>
               {items.map((n) => (
                 <CardItem
                   key={n.id}
@@ -305,6 +354,7 @@ export function LibraryView({
                   node={n}
                   lib={lib}
                   remote={remote}
+                  compact={mode === 'compact'}
                   selected={selected.has(n.id)}
                   onSelect={() => toggle(n.id)}
                   onOpen={() => openDetails(n.id)}
@@ -496,6 +546,7 @@ function Row({
   node,
   lib,
   remote,
+  compact,
   selected,
   onSelect,
   onOpen,
@@ -504,6 +555,7 @@ function Row({
   node: TreeNode;
   lib: Lib;
   remote: boolean;
+  compact?: boolean;
   selected: boolean;
   onSelect: () => void;
   onOpen: () => void;
@@ -516,7 +568,11 @@ function Row({
     <div
       draggable
       onDragStart={onDragStart}
-      className={cx('group flex h-12 items-center gap-3 border-b border-line px-3 last:border-b-0 hover:bg-hover', selected && 'bg-accent-soft/60')}
+      className={cx(
+        'group flex items-center gap-3 border-b border-line px-3 last:border-b-0 hover:bg-hover',
+        compact ? 'h-8' : 'h-12',
+        selected && 'bg-accent-soft/60',
+      )}
     >
       <button
         onClick={onSelect}
@@ -530,11 +586,14 @@ function Row({
       <Favicon url={node.url} remote={remote} />
       <button onClick={onOpen} className="min-w-0 flex-1 text-start">
         <div className="flex items-center gap-2">
-          <span dir="auto" className="truncate text-[13.5px] font-medium">{displayTitle(node.title, node.url, v)}</span>
+          <span dir="auto" className={cx('truncate font-medium', compact ? 'text-[13px]' : 'text-[13.5px]')}>
+            {displayTitle(node.title, node.url, v)}
+          </span>
+          {compact && <span className="ltr hidden truncate text-xs text-muted sm:inline">{hostOf(node.url)}</span>}
           {v.fav && <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />}
           <HealthDot node={node} />
         </div>
-        <div className="truncate text-xs text-muted">{v.notes || <span className="ltr">{hostOf(node.url)}</span>}</div>
+        {!compact && <div className="truncate text-xs text-muted">{v.notes || <span className="ltr">{hostOf(node.url)}</span>}</div>}
       </button>
       <div className="hidden max-w-[30%] shrink-0 items-center gap-1 overflow-hidden md:flex">
         {(v.tags ?? []).slice(0, 3).map((tag) => (
@@ -625,5 +684,78 @@ function RenameDialog({ open, initial, onClose, onSave }: { open: boolean; initi
         </div>
       </form>
     </Modal>
+  );
+}
+
+/** Speed-dial style tile: large icon (or preview at bigger sizes) and the name. */
+function Tile({
+  node,
+  remote,
+  size,
+  selected,
+  selecting,
+  onSelect,
+  onOpen,
+  onDragStart,
+}: {
+  node: TreeNode;
+  remote: boolean;
+  size: number;
+  selected: boolean;
+  selecting: boolean;
+  onSelect: () => void;
+  onOpen: () => void;
+  onDragStart: (e: DragEvent) => void;
+}) {
+  const { t } = useI18n();
+  const v = node.rec.v;
+  const icon = [22, 26, 30, 36, 42][size - 1];
+  return (
+    <div
+      draggable
+      onDragStart={onDragStart}
+      className={cx(
+        'cv-auto group relative flex flex-col items-center rounded-xl border bg-card p-3 text-center transition hover:-translate-y-0.5 hover:shadow-md',
+        selected ? 'border-accent ring-2 ring-accent/30' : 'border-line hover:border-accent/40',
+      )}
+    >
+      <a
+        href={node.url}
+        target="_blank"
+        rel="noreferrer"
+        onClick={(e) => {
+          if (selecting) {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+        className="flex w-full flex-col items-center gap-2 hover:no-underline"
+      >
+        <span className="flex aspect-square w-[62%] items-center justify-center rounded-2xl bg-hover">
+          <Favicon url={node.url} size={icon} remote={remote} />
+        </span>
+        <span dir="auto" className="line-clamp-2 w-full text-[12px] font-medium leading-snug text-fg">
+          {displayTitle(node.title, node.url, v)}
+        </span>
+      </a>
+      <button
+        onClick={onSelect}
+        aria-label="select"
+        className={cx(
+          'absolute start-1.5 top-1.5 flex size-5 items-center justify-center rounded border transition',
+          selected ? 'border-accent bg-accent text-accent-fg' : 'border-line bg-card text-transparent opacity-0 group-hover:opacity-100',
+        )}
+      >
+        <Check className="size-3" />
+      </button>
+      <button
+        onClick={onOpen}
+        title={t('edit')}
+        className="absolute end-1.5 top-1.5 flex size-6 items-center justify-center rounded-md text-muted opacity-0 transition hover:bg-hover hover:text-fg group-hover:opacity-100"
+      >
+        <Pencil className="size-3.5" />
+      </button>
+      {v.fav && <Star className="absolute end-2 top-2 size-3.5 fill-yellow-400 text-yellow-400 group-hover:hidden" />}
+    </div>
   );
 }
