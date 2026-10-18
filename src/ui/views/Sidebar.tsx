@@ -17,6 +17,7 @@ import {
 import { useState, type DragEvent, type ReactNode } from 'react';
 import type { TreeNode } from '../../core/tree';
 import { ROOT } from '../../core/types';
+import { linkHealth } from '../../enrich/metadata';
 import { send } from '../../lib/messages';
 import { useFolderName } from '../components/bits';
 import { cx, useToast } from '../components/ui';
@@ -218,7 +219,7 @@ export function Sidebar({
         <Item
           icon={<AlertTriangle className="size-4" />}
           label={t('navBroken')}
-          count={lib.bookmarks.filter((b) => b.rec.v.checkedAt && (b.rec.v.status === 0 || b.rec.v.status === 404 || b.rec.v.status === 410)).length}
+          count={lib.bookmarks.filter((b) => linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken').length}
           active={is('broken')}
           onClick={() => go('/library/broken')}
         />

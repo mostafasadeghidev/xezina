@@ -107,8 +107,33 @@ export async function fetchPage(url: string, timeout = 15_000): Promise<PageInfo
   }
 }
 
+/**
+ * Pages browsers never let extensions read (their own extension stores).
+ * Fetching them only produces a CORS error, so they are not checked at all.
+ */
+export function isProtectedPage(url: string): boolean {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+    return (
+      host === 'chromewebstore.google.com' ||
+      (host === 'chrome.google.com' && u.pathname.startsWith('/webstore')) ||
+      (host === 'microsoftedge.microsoft.com' && u.pathname.startsWith('/addons')) ||
+      host === 'addons.mozilla.org' ||
+      host === 'addons.opera.com'
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Link health from a status code. */
-export function linkHealth(status: number | undefined, checkedAt: number | undefined): 'ok' | 'broken' | 'blocked' | 'unknown' {
+export function linkHealth(
+  status: number | undefined,
+  checkedAt: number | undefined,
+  url?: string,
+): 'ok' | 'broken' | 'blocked' | 'unknown' {
+  if (url && isProtectedPage(url)) return 'blocked';
   if (!checkedAt) return 'unknown';
   if (status === undefined) return 'unknown';
   if (status >= 200 && status < 400) return 'ok';

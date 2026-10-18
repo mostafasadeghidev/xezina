@@ -43,7 +43,7 @@ export function Details({ lib, id, onClose, remote }: { lib: Library; id: string
 
   if (!node) return null;
   const v = node.rec.v;
-  const health = linkHealth(v.status, v.checkedAt);
+  const health = linkHealth(v.status, v.checkedAt, node.url);
   const dirty =
     title !== node.title ||
     url !== node.url ||

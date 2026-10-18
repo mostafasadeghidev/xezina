@@ -60,7 +60,7 @@ export function select(lib: Library, filter: Filter, query: string, sort: Sort):
       break;
     }
     case 'broken':
-      items = lib.bookmarks.filter((b) => linkHealth(b.rec.v.status, b.rec.v.checkedAt) === 'broken');
+      items = lib.bookmarks.filter((b) => linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken');
       break;
     case 'untagged':
       items = lib.bookmarks.filter((b) => !(b.rec.v.tags ?? []).length);

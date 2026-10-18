@@ -6,7 +6,7 @@ import { buildTree } from '../core/tree';
 import { isRoot, type FieldValues, type Rec, type State } from '../core/types';
 import { db, DEFAULT_STATUS, kvGet, kvSet, loadDevice, saveDevice, type EnrichStatus, type SyncStatus } from '../db/db';
 import { dataUrlToBlob, downloadImage, hashBlob, makePreview } from '../enrich/images';
-import { fetchPage } from '../enrich/metadata';
+import { fetchPage, isProtectedPage } from '../enrich/metadata';
 import { getSettings, guessDeviceName, saveSettings, type Settings } from '../lib/settings';
 import { ensureRepo, githubDevicePoll, githubDeviceStart, githubUser, type DeviceCode } from '../storage/github';
 import { BUILT_IN_CLIENT_IDS, signIn, tokenSource } from '../storage/oauth';
@@ -354,6 +354,7 @@ export async function enrich(ids?: string[], force = false) {
         alive.has(r.id) &&
         r.v.kind === 'bookmark' &&
         /^https?:/i.test(r.v.url ?? '') &&
+        !isProtectedPage(r.v.url ?? '') &&
         (ids ? wanted.has(r.id) : force || !r.v.checkedAt),
     );
     const status: EnrichStatus = { running: true, done: 0, total: queue.length };
@@ -430,7 +431,7 @@ const recentCaptures = new Map<string, number>();
 
 /** Called when a tab finished loading: screenshot it if it is a bookmark without a screenshot. */
 export async function maybeAutoCapture(tab: { id?: number; windowId?: number; url?: string; active?: boolean }) {
-  if (!tab.url || !tab.active || tab.windowId === undefined || !/^https?:/.test(tab.url)) return;
+  if (!tab.url || !tab.active || tab.windowId === undefined || !/^https?:/.test(tab.url) || isProtectedPage(tab.url)) return;
   const s = await getSettings();
   if (!s.previews.autoCapture || !(await hasAllUrls())) return;
   const key = normalizeUrl(tab.url);
@@ -650,7 +651,7 @@ export async function onBrowserBookmarked(nativeId: string, url: string) {
   if (!id) return;
   // The popup shows this bookmark even when it cannot read the tab's address.
   await kvSet('lastStar', { id, at: Date.now() });
-  if (access && s.previews.autoCapture && tab?.windowId !== undefined) {
+  if (access && s.previews.autoCapture && tab?.windowId !== undefined && !isProtectedPage(url)) {
     await capture(tab.windowId, id).catch(() => undefined);
   }
   if (access) void enrich([id]).catch(() => undefined);

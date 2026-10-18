@@ -378,7 +378,7 @@ function FolderChip({ node, count, onOpen }: { node: TreeNode; count: number; on
 }
 
 function HealthDot({ node }: { node: TreeNode }) {
-  const h = linkHealth(node.rec.v.status, node.rec.v.checkedAt);
+  const h = linkHealth(node.rec.v.status, node.rec.v.checkedAt, node.url);
   if (h !== 'broken') return null;
   return <span className="size-2 shrink-0 rounded-full bg-danger" title="broken" />;
 }

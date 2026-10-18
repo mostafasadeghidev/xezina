@@ -28,7 +28,7 @@ export function Dashboard({ lib, go }: { lib: Library; go: (r: string) => void }
   const deviceId = useLiveQuery(async () => ((await db.kv.get('device'))?.value as { deviceId?: string } | undefined)?.deviceId, []);
 
   const folders = [...lib.tree.byId.values()].filter((n) => n.kind === 'folder').length;
-  const broken = lib.bookmarks.filter((b) => linkHealth(b.rec.v.status, b.rec.v.checkedAt) === 'broken').length;
+  const broken = lib.bookmarks.filter((b) => linkHealth(b.rec.v.status, b.rec.v.checkedAt, b.url) === 'broken').length;
   const dups = [...lib.dupGroups.values()].reduce((n, g) => n + g.length, 0);
   const checked = lib.bookmarks.filter((b) => b.rec.v.checkedAt).length;
 

@@ -87,3 +87,16 @@ describe('search', () => {
     expect(searchIds(idx, 'figm')).toContain('1');
   });
 });
+
+describe('link health', () => {
+  it('never calls extension-store pages broken', async () => {
+    const { linkHealth, isProtectedPage } = await import('../src/enrich/metadata');
+    const store = 'https://chromewebstore.google.com/detail/idm-integration-module/ngpampappnmepgilojfohadhhmbhlaek';
+    expect(isProtectedPage(store)).toBe(true);
+    expect(isProtectedPage('https://microsoftedge.microsoft.com/addons/detail/x')).toBe(true);
+    expect(isProtectedPage('https://google.com/')).toBe(false);
+    expect(linkHealth(0, Date.now(), store)).toBe('blocked');
+    expect(linkHealth(0, Date.now(), 'https://gone.example/')).toBe('broken');
+    expect(linkHealth(200, Date.now(), 'https://ok.example/')).toBe('ok');
+  });
+});
