@@ -19,6 +19,15 @@ function assert(cond, msg) {
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
 let version = 1;
 const site = http.createServer((req, res) => {
+  if (req.url.startsWith('/slow')) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(`<html><head><title>Slow</title><style>
+      body{margin:0;height:100vh;background:#444}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      .s{width:200px;height:200px;margin:200px auto;border:20px solid #fff;border-top-color:#f00;border-radius:50%;animation:spin .6s linear infinite}
+    </style></head><body><div class="s"></div>
+    <script>setTimeout(()=>{document.body.innerHTML='';document.body.style.background='rgb(0,200,0)'},9000)</script></body></html>`);
+  }
   if (req.url.startsWith('/img')) {
     res.writeHead(200, { 'Content-Type': 'image/png' });
     return res.end(PNG);
@@ -83,6 +92,27 @@ try {
   await sleep(500);
   assert(page.context().pages().length === before, 'the window closed itself');
   console.log(`   took ${Math.round((Date.now() - t0) / 1000)} s`);
+  await sw.evaluate((u) => chrome.bookmarks.create({ parentId: '1', title: 'slow', url: u }), SITE + 'slow');
+  await sleep(1500);
+  const slow = await rec(SITE + 'slow');
+  const t1 = Date.now();
+  res = await msg({ type: 'shoot', id: slow.id });
+  const secs = Math.round((Date.now() - t1) / 1000);
+  assert(res.ok && secs >= 10, `a slow page gets more time (${secs} s)`);
+  const color = await page.evaluate(async (hash) => {
+    const req = indexedDB.open('xezina');
+    const db = await new Promise((r) => (req.onsuccess = () => r(req.result)));
+    const row = await new Promise((r) => {
+      const q = db.transaction('blobs').objectStore('blobs').get(hash);
+      q.onsuccess = () => r(q.result);
+    });
+    const bmp = await createImageBitmap(row.blob);
+    const c = new OffscreenCanvas(bmp.width, bmp.height);
+    const g = c.getContext('2d');
+    g.drawImage(bmp, 0, 0);
+    return [...g.getImageData(Math.floor(bmp.width / 2), Math.floor(bmp.height / 2), 1, 1).data].slice(0, 3);
+  }, (await rec(SITE + 'slow')).v.img);
+  assert(color[1] > 150 && color[0] < 80, `the picture shows the finished page, not the loading screen (rgb ${color.join(',')})`);
   console.log('\nALL GOOD');
 } finally {
   await ctx.close();

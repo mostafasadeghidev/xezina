@@ -471,13 +471,35 @@ export async function shootPage(id: string): Promise<string> {
       if (t.status === 'complete') break;
       await new Promise((r) => setTimeout(r, 300));
     }
-    await new Promise((r) => setTimeout(r, 4000));
     await browser.windows.update(win.id, { focused: true });
-    return await capture(win.id, id);
+    return await storeShot(id, await captureWhenSettled(win.id));
   } finally {
     if (win.id !== undefined) await browser.windows.remove(win.id).catch(() => undefined);
     if (focused?.id !== undefined) await browser.windows.update(focused.id, { focused: true }).catch(() => undefined);
   }
+}
+
+/**
+ * Waits until a page stops changing on screen (loading screens, fade-ins,
+ * script-drawn content) and returns that picture. At least 5 s, at most 30 s.
+ */
+async function captureWhenSettled(windowId: number): Promise<string> {
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const shot = () => browser.tabs.captureVisibleTab(windowId, { format: 'jpeg', quality: 85 });
+  // Two pictures that are the same, or almost the same size (a blinking cursor), count as "still".
+  const same = (a: string, b: string) => a === b || Math.abs(a.length - b.length) / Math.max(a.length, 1) < 0.002;
+  const start = Date.now();
+  await sleep(5000);
+  let prev = await shot();
+  let still = 0;
+  while (Date.now() - start < 30_000) {
+    await sleep(1500);
+    const next = await shot();
+    still = same(prev, next) ? still + 1 : 0;
+    prev = next;
+    if (still >= 2) break; // unchanged for about 3 s
+  }
+  return prev;
 }
 
 /** "Refresh info" for one bookmark; waits for the result. */
@@ -492,6 +514,10 @@ export async function refreshOne(id: string): Promise<RefreshResult> {
 /** Screenshot of a visible tab as the bookmark's preview. */
 export async function capture(windowId: number, id: string) {
   const dataUrl = await browser.tabs.captureVisibleTab(windowId, { format: 'jpeg', quality: 85 });
+  return storeShot(id, dataUrl);
+}
+
+async function storeShot(id: string, dataUrl: string) {
   const hash = await storeBlob(await makePreview(dataUrlToBlob(dataUrl), true));
   await mutate([id], (r, clock) => setFields(r, { img: hash, imgSrc: 'shot' }, clock));
   return hash;
