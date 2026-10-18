@@ -6,3 +6,4 @@ node_modules
 stats.html
 web-ext.config.ts
 .claude/
+.local-install.json

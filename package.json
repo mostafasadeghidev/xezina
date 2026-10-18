@@ -1,7 +1,7 @@
 {
   "name": "xezina",
   "description": "Sync, organize and search your bookmarks across every browser — with the storage of your choice.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -16,7 +16,8 @@
     "zip:edge": "wxt zip -b edge",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "local": "wxt build && node scripts/install-local.mjs"
   },
   "dependencies": {
     "@fontsource-variable/vazirmatn": "^5.3.0",

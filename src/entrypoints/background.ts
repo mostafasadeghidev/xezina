@@ -133,7 +133,38 @@ export default defineBackground(() => {
     (ev as { addListener(cb: () => void): void } | undefined)?.addListener(() => onBookmarkEvent());
   }
 
+  // Unpacked installs updated with "pnpm local": reload when a new build lands in the folder.
+  // The stamp of the running build is kept in storage, because the service worker sleeps.
+  const diskBuild = async (): Promise<string | null> => {
+    try {
+      const res = await fetch(browser.runtime.getURL('/build.json' as '/manager.html'), { cache: 'no-store' });
+      return res.ok ? String((await res.json()).builtAt) : null;
+    } catch {
+      return null;
+    }
+  };
+  const checkLocalBuild = async () => {
+    const onDisk = await diskBuild();
+    if (!onDisk) return;
+    const { loadedBuild } = (await browser.storage.local.get('loadedBuild')) as { loadedBuild?: string };
+    if (!loadedBuild) await browser.storage.local.set({ loadedBuild: onDisk });
+    else if (loadedBuild !== onDisk) {
+      await browser.storage.local.set({ loadedBuild: onDisk });
+      browser.runtime.reload();
+    }
+  };
+  browser.runtime.onInstalled.addListener(() => {
+    void diskBuild().then(async (b) => {
+      if (b) await browser.storage.local.set({ loadedBuild: b });
+    });
+  });
+  void diskBuild().then((b) => {
+    if (b) void browser.alarms.create('xezina-local-build', { periodInMinutes: 1 });
+  });
+  void checkLocalBuild();
+
   browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'xezina-local-build') void checkLocalBuild();
     if (alarm.name === 'xezina-sync') void sync().catch(() => undefined);
     if (alarm.name === 'xezina-enrich') scheduleEnrich(1000);
   });
