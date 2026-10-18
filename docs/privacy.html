@@ -4,73 +4,71 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Xezina — Privacy policy</title>
+<meta name="description" content="Xezina privacy policy">
 <link rel="icon" href="logo.png">
-<style>
-  :root { --bg:#0b0c0f; --fg:#eceef2; --muted:#949bab; --accent:#7c7cff; --line:#23262e; }
-  @media (prefers-color-scheme: light) { :root { --bg:#f6f7f9; --fg:#111827; --muted:#5b6170; --accent:#5b5bf0; --line:#e4e7ec; } }
-  body { margin:0; background:var(--bg); color:var(--fg); font: 16px/1.7 system-ui, -apple-system, "Segoe UI", Vazirmatn, Tahoma, sans-serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
-  h1 { font-size: 32px; margin: 0 0 4px; }
-  h2 { font-size: 19px; margin-top: 32px; }
-  p, li { color: var(--fg); }
-  .muted { color: var(--muted); }
-  a { color: var(--accent); }
-  hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
 </head>
-<body>
-<main>
-  <p><a href="./">← Xezina</a></p>
-  <h1>Privacy policy</h1>
-  <p class="muted">Last updated: 18 October 2026</p>
+<body data-page="privacy">
 
-  <p>Xezina is a browser extension. It has no servers, no accounts, no analytics and no ads. The
-  developer never receives your bookmarks or any other data.</p>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="./" data-keep-lang><img src="logo.png" alt=""> Xezina</a>
+    <select id="lang" class="lang" aria-label="Language" style="margin-inline-start:auto"></select>
+  </div>
+</header>
 
-  <h2>What Xezina reads</h2>
+<main class="doc">
+  <p><a href="./" data-keep-lang data-i18n="pv_back">← Back to Xezina</a></p>
+  <h1 data-i18n="pv_title">Privacy policy</h1>
+  <p class="muted" data-i18n="pv_updated">Last updated: 18 October 2026</p>
+
+  <p data-i18n="pv_intro">Xezina is a browser extension. It has no servers, no accounts, no analytics and no ads. The developer never receives your bookmarks or any other data.</p>
+
+  <h2 data-i18n="pv_reads_t">What Xezina reads</h2>
   <ul>
-    <li><b>Your bookmarks</b>, to show, search and sync them.</li>
-    <li><b>Pages you bookmarked</b> — only if you allow "access to pages" — to read their title,
-    description and preview image, to check whether links still work, and to take a screenshot of a
-    bookmarked page while you are viewing it. Pages you have not bookmarked are never read or
-    captured.</li>
+    <li data-i18n="pv_reads_1"></li>
+    <li data-i18n="pv_reads_2"></li>
   </ul>
 
-  <h2>Where your data goes</h2>
-  <p>Everything is stored in your browser. If you turn on sync, Xezina uploads your bookmarks,
-  notes, tags and preview images to <b>the storage you choose</b> (your Google Drive app folder,
-  Dropbox app folder, OneDrive app folder, your WebDAV server, your S3 bucket or your GitHub
-  repository), using your own credentials, directly from your browser. That provider's privacy
-  policy applies to what you store there.</p>
-  <p>With end-to-end encryption on, the data is encrypted in your browser with your passphrase
-  (AES-256-GCM) before upload, so the storage provider cannot read it.</p>
+  <h2 data-i18n="pv_where_t">Where your data goes</h2>
+  <p data-i18n="pv_where_1"></p>
+  <p data-i18n="pv_where_2"></p>
 
-  <h2>Google user data</h2>
-  <p>When you connect Google Drive, Xezina requests only the <code>drive.appdata</code> scope: access
-  to a hidden folder that only Xezina can see. It cannot see or change any other file in your Drive.
-  Data from Google APIs is used only to store and read your own Xezina sync files, is not shared with
-  anyone, and is not used for advertising or to train AI models. Xezina's use of information received
-  from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use
-  requirements. You can revoke access at any time at
-  <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
+  <h2 data-i18n="pv_google_t">Google user data</h2>
+  <!-- English text kept in the page source for reviewers; replaced by the selected language. -->
+  <p data-i18n="pv_google_1">When you connect Google Drive, Xezina requests only the <code>drive.appdata</code> scope: a hidden folder that only Xezina can see. It cannot see or change any other file in your Drive. Data from Google APIs is used only to store and read your own Xezina sync files, is not shared with anyone, and is not used for advertising or to train AI models. Xezina’s use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements. You can revoke access at any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
 
-  <h2>Favicons</h2>
-  <p>In Chromium browsers, site icons come from the browser itself. In Firefox, if previews are
-  enabled, icons are loaded from DuckDuckGo's public icon service using only the site's domain.</p>
+  <h2 data-i18n="pv_icons_t">Site icons</h2>
+  <p data-i18n="pv_icons_1"></p>
 
-  <h2>Deleting your data</h2>
-  <p>Disconnect the storage in Settings and delete the <code>Xezina</code> folder (or bucket prefix /
-  repository) there. Removing the extension deletes everything it stored in your browser.</p>
+  <h2 data-i18n="pv_delete_t">Deleting your data</h2>
+  <p data-i18n="pv_delete_1"></p>
 
-  <h2>Contact</h2>
+  <h2 data-i18n="pv_contact_t">Contact</h2>
   <p><a href="https://github.com/mostafasadeghidev/xezina/issues">github.com/mostafasadeghidev/xezina/issues</a></p>
-
-  <hr>
-
-  <div dir="rtl">
-    <h1>حریم خصوصی</h1>
-    <p>Xezina سرور، حساب کاربری، آمارگیر و تبلیغ ندارد و هیچ اطلاعاتی از شما به سازنده نمی‌رسد. بوکمارک‌ها، یادداشت‌ها و برچسب‌ها فقط در مرورگرتان نگه داشته می‌شوند. اگر همگام‌سازی را روشن کنید، این اطلاعات مستقیم از مرورگرتان به فضای ذخیره‌سازی‌ای می‌رود که خودتان انتخاب کرده‌اید، با حساب و اجازه‌نامهٔ خودتان. اگر رمزگذاری را روشن کنید، اطلاعات پیش از ارسال با عبارت عبورتان رمز می‌شود. صفحه‌هایی که بوکمارک نکرده‌اید هرگز خوانده نمی‌شوند و از آن‌ها تصویری گرفته نمی‌شود.</p>
-  </div>
 </main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="./" data-keep-lang><img src="logo.png" alt=""> Xezina</a>
+    <span>© <span id="year">2026</span> · <span data-i18n="footer_license">MIT License</span></span>
+    <nav>
+      <a href="https://github.com/mostafasadeghidev/xezina" data-i18n="footer_source">Source code</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="i18n/en.js"></script>
+<script src="i18n/fa.js"></script>
+<script src="i18n/ckb.js"></script>
+<script src="i18n/ar.js"></script>
+<script src="i18n/de.js"></script>
+<script src="i18n/fr.js"></script>
+<script src="i18n/it.js"></script>
+<script src="i18n/pt.js"></script>
+<script src="site.js"></script>
 </body>
 </html>

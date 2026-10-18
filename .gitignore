@@ -5,3 +5,4 @@ node_modules
 .env*
 stats.html
 web-ext.config.ts
+.claude/

@@ -3,78 +3,198 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Xezina — your bookmarks, everywhere</title>
-<meta name="description" content="Free, open-source browser extension that syncs, organizes and searches your bookmarks across Chrome, Edge, Firefox and Brave using storage you own.">
+<title>Xezina — your bookmarks, in every browser</title>
+<meta name="description" content="Free, open-source extension that syncs, organizes and searches your bookmarks across Chrome, Edge, Firefox and Brave, using storage you own.">
+<meta property="og:title" content="Xezina">
+<meta property="og:description" content="Your bookmarks, in every browser — organized, searchable, and stored where you choose.">
+<meta property="og:image" content="https://mostafasadeghidev.github.io/xezina/screenshots/library-dark.png">
+<meta name="theme-color" content="#5b5bf0">
 <link rel="icon" href="logo.png">
-<style>
-  :root { --bg:#0b0c0f; --panel:#121419; --line:#23262e; --fg:#eceef2; --muted:#949bab; --accent:#7c7cff; }
-  @media (prefers-color-scheme: light) { :root { --bg:#f6f7f9; --panel:#fff; --line:#e4e7ec; --fg:#111827; --muted:#5b6170; --accent:#5b5bf0; } }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Vazirmatn, Tahoma, sans-serif; }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
-  header { display:flex; align-items:center; gap:12px; padding:22px 0; }
-  header img { width:36px; height:36px; }
-  header b { font-size:18px; }
-  header nav { margin-inline-start:auto; display:flex; gap:18px; font-size:14px; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .hero { padding: 56px 0 40px; text-align: center; }
-  .hero h1 { font-size: clamp(32px, 6vw, 54px); line-height:1.1; margin:0 0 16px; letter-spacing:-.02em; }
-  .hero p { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0 auto 28px; }
-  .btn { display:inline-block; padding:12px 22px; border-radius:12px; background:var(--accent); color:#fff; font-weight:600; }
-  .btn.alt { background:transparent; color:var(--fg); border:1px solid var(--line); margin-inline-start:8px; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; padding: 24px 0 48px; }
-  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; }
-  .card h3 { margin:0 0 6px; font-size:16px; }
-  .card p { margin:0; color:var(--muted); font-size:14px; }
-  .chips { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin: 0 0 40px; }
-  .chips span { border:1px solid var(--line); border-radius:999px; padding:6px 14px; font-size:14px; background:var(--panel); }
-  footer { border-top:1px solid var(--line); padding:24px 0 40px; color:var(--muted); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; }
-  [dir=rtl] .btn.alt { margin-inline-start:8px; }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <img src="logo.png" alt="">
-    <b>Xezina</b>
-    <nav>
-      <a href="https://github.com/mostafasadeghidev/xezina">GitHub</a>
-      <a href="privacy.html">Privacy</a>
-      <a href="#fa" onclick="document.getElementById('fa').scrollIntoView();return false">فارسی</a>
+<body data-page="home">
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="logo.png" alt=""> Xezina</a>
+    <nav class="nav-links">
+      <a href="#features" data-i18n="nav_features">Features</a>
+      <a href="#storage" data-i18n="nav_storage">Storage</a>
+      <a href="#install" data-i18n="nav_install">Install</a>
+      <a href="#faq" data-i18n="nav_faq">FAQ</a>
+      <a href="privacy.html" data-keep-lang data-i18n="nav_privacy">Privacy</a>
     </nav>
-  </header>
+    <select id="lang" class="lang" aria-label="Language"></select>
+    <a class="gh-btn" href="https://github.com/mostafasadeghidev/xezina" aria-label="GitHub">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+    </a>
+  </div>
+</header>
 
+<main>
   <section class="hero">
-    <h1>Your bookmarks,<br>in every browser.</h1>
-    <p>Xezina keeps Chrome, Edge, Firefox and Brave in sync, and turns a thousand bookmarks into a searchable library with notes, tags and previews — stored in your own cloud, never on ours.</p>
-    <a class="btn" href="https://github.com/mostafasadeghidev/xezina/releases/latest">Download</a>
-    <a class="btn alt" href="https://github.com/mostafasadeghidev/xezina">Source code</a>
+    <div class="wrap">
+      <span class="badge"><i></i><span data-i18n="hero_badge">Free &amp; open source</span></span>
+      <h1 data-i18n="hero_title">Your bookmarks,<br>in every browser.</h1>
+      <p class="lead" data-i18n="hero_text"></p>
+      <div class="buttons">
+        <a class="btn primary" href="https://github.com/mostafasadeghidev/xezina/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg>
+          <span data-i18n="hero_download">Download</span>
+        </a>
+        <a class="btn ghost" href="https://github.com/mostafasadeghidev/xezina">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+          <span data-i18n="hero_github">View on GitHub</span>
+        </a>
+      </div>
+      <small data-i18n="hero_note"></small>
+      <div class="frame">
+        <div class="frame-bar"><span></span><span></span><span></span></div>
+        <img src="screenshots/library-dark.png" data-rtl-src="screenshots/library-fa.png" alt="Xezina" width="1440" height="900">
+      </div>
+    </div>
   </section>
 
-  <div class="chips">
-    <span>Google Drive</span><span>Dropbox</span><span>OneDrive</span><span>Nextcloud / WebDAV</span><span>Cloudflare R2 / S3</span><span>GitHub</span>
-  </div>
-
-  <div class="grid">
-    <div class="card"><h3>Real two-way sync</h3><p>Changes from different browsers are merged field by field. A rename here and a move there both survive.</p></div>
-    <div class="card"><h3>Find anything</h3><p>Search titles, addresses, your notes, tags and page descriptions — even from the address bar with <code>bm</code>.</p></div>
-    <div class="card"><h3>Notes, tags, previews</h3><p>Write why you saved a page, tag it, and see the site at a glance.</p></div>
-    <div class="card"><h3>Private by design</h3><p>No Xezina server. Optional end-to-end encryption with your passphrase.</p></div>
-    <div class="card"><h3>Safe</h3><p>Automatic backups before every sync, one-click restore, and a guard against mass deletion.</p></div>
-    <div class="card"><h3>8 languages</h3><p>English, فارسی, کوردی, العربية, Deutsch, Français, Italiano, Português.</p></div>
-  </div>
-
-  <section id="fa" dir="rtl" class="card" style="margin-bottom:48px">
-    <h3>Xezina به زبانِ ساده</h3>
-    <p>افزونه‌ای رایگان و متن‌باز که بوکمارک‌هایتان را بین Chrome، Edge، Firefox و Brave همگام نگه می‌دارد. با یادداشت، برچسب، پیش‌نمایش و جستجوی قوی، مرتب‌کردن و پیدا کردنِ هزاران بوکمارک را آسان می‌کند. اطلاعات فقط در فضای ذخیره‌سازیِ خودتان می‌ماند: Google Drive، Dropbox، OneDrive، Nextcloud، Cloudflare R2، ابرآروان یا GitHub.</p>
+  <section id="storage" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 data-i18n="storage_title"></h2>
+        <p data-i18n="storage_text"></p>
+      </div>
+      <div class="providers">
+        <div class="provider"><span class="dot" style="background:#1fa463">G</span>Google Drive</div>
+        <div class="provider"><span class="dot" style="background:#0061fe">D</span>Dropbox</div>
+        <div class="provider"><span class="dot" style="background:#0a78d4">O</span>OneDrive</div>
+        <div class="provider"><span class="dot" style="background:#0082c9">N</span>Nextcloud / WebDAV</div>
+        <div class="provider"><span class="dot" style="background:#f38020">R2</span>Cloudflare R2 / S3</div>
+        <div class="provider"><span class="dot" style="background:#24292f">GH</span>GitHub</div>
+      </div>
+    </div>
   </section>
 
-  <footer>
-    <span>© 2026 Xezina · MIT License</span>
-    <a href="privacy.html">Privacy policy</a>
-    <a href="https://github.com/mostafasadeghidev/xezina/issues">Report a problem</a>
-  </footer>
-</div>
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head"><h2 data-i18n="features_title"></h2></div>
+      <div class="features">
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16m0 5v-5h5M3 12a9 9 0 0 1 15.5-6.2L21 8m0-5v5h-5"/></svg></div><h3 data-i18n="f_sync_t"></h3><p data-i18n="f_sync_d"></p></div>
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div><h3 data-i18n="f_search_t"></h3><p data-i18n="f_search_d"></p></div>
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></div><h3 data-i18n="f_notes_t"></h3><p data-i18n="f_notes_d"></p></div>
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></div><h3 data-i18n="f_preview_t"></h3><p data-i18n="f_preview_d"></p></div>
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></div><h3 data-i18n="f_clean_t"></h3><p data-i18n="f_clean_d"></p></div>
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3 data-i18n="f_private_t"></h3><p data-i18n="f_private_d"></p></div>
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></div><h3 data-i18n="f_safe_t"></h3><p data-i18n="f_safe_d"></p></div>
+        <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></div><h3 data-i18n="f_lang_t"></h3><p data-i18n="f_lang_d"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head"><h2 data-i18n="shots_title"></h2></div>
+      <div class="gallery-tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-i18n="shot_library">Library</button>
+        <button role="tab" aria-selected="false" data-i18n="shot_details">Notes and tags</button>
+        <button role="tab" aria-selected="false" data-i18n="shot_search">Instant search</button>
+        <button role="tab" aria-selected="false" data-i18n="shot_dashboard">Dashboard</button>
+      </div>
+      <div class="gallery">
+        <div class="frame">
+          <div class="frame-bar"><span></span><span></span><span></span></div>
+          <img class="on" src="screenshots/library-light.png" alt="" loading="lazy" width="1440" height="900">
+          <img src="screenshots/details.png" alt="" loading="lazy" width="1440" height="900">
+          <img src="screenshots/search.png" alt="" loading="lazy" width="1440" height="900">
+          <img src="screenshots/dashboard.png" alt="" loading="lazy" width="1440" height="900">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2 data-i18n="how_title"></h2></div>
+      <div class="steps">
+        <div class="step"><h3 data-i18n="how_1_t"></h3><p data-i18n="how_1_d"></p></div>
+        <div class="step"><h3 data-i18n="how_2_t"></h3><p data-i18n="how_2_d"></p></div>
+        <div class="step"><h3 data-i18n="how_3_t"></h3><p data-i18n="how_3_d"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="alt">
+    <div class="wrap">
+      <div class="section-head"><h2 data-i18n="install_title"></h2></div>
+      <div class="install">
+        <div class="card">
+          <h3 data-i18n="install_chrome_t"></h3>
+          <ol>
+            <li data-i18n="install_chrome_1"></li>
+            <li data-i18n="install_chrome_2"></li>
+            <li data-i18n="install_chrome_3"></li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3 data-i18n="install_firefox_t"></h3>
+          <ol>
+            <li data-i18n="install_firefox_1"></li>
+            <li data-i18n="install_firefox_2"></li>
+          </ol>
+          <div class="tip" data-i18n="install_tip"></div>
+        </div>
+      </div>
+      <div class="buttons" style="margin-top:28px">
+        <a class="btn primary" href="https://github.com/mostafasadeghidev/xezina/releases/latest"><span data-i18n="hero_download">Download</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head"><h2 data-i18n="faq_title"></h2></div>
+      <div class="faq">
+        <details><summary data-i18n="faq_1_q"></summary><p data-i18n="faq_1_a"></p></details>
+        <details><summary data-i18n="faq_2_q"></summary><p data-i18n="faq_2_a"></p></details>
+        <details><summary data-i18n="faq_3_q"></summary><p data-i18n="faq_3_a"></p></details>
+        <details><summary data-i18n="faq_4_q"></summary><p data-i18n="faq_4_a"></p></details>
+        <details><summary data-i18n="faq_5_q"></summary><p data-i18n="faq_5_a"></p></details>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="cta">
+      <h2 data-i18n="cta_title"></h2>
+      <p data-i18n="cta_text"></p>
+      <div class="buttons">
+        <a class="btn white" href="https://github.com/mostafasadeghidev/xezina/releases/latest"><span data-i18n="hero_download">Download</span></a>
+        <a class="btn ghost" href="https://github.com/mostafasadeghidev/xezina"><span data-i18n="footer_source">Source code</span></a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="./"><img src="logo.png" alt=""> Xezina</a>
+    <span>© <span id="year">2026</span> · <span data-i18n="footer_license">MIT License</span></span>
+    <nav>
+      <a href="https://github.com/mostafasadeghidev/xezina" data-i18n="footer_source">Source code</a>
+      <a href="https://github.com/mostafasadeghidev/xezina/issues" data-i18n="footer_issues">Report a problem</a>
+      <a href="privacy.html" data-keep-lang data-i18n="nav_privacy">Privacy</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="i18n/en.js"></script>
+<script src="i18n/fa.js"></script>
+<script src="i18n/ckb.js"></script>
+<script src="i18n/ar.js"></script>
+<script src="i18n/de.js"></script>
+<script src="i18n/fr.js"></script>
+<script src="i18n/it.js"></script>
+<script src="i18n/pt.js"></script>
+<script src="site.js"></script>
 </body>
 </html>
