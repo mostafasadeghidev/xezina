@@ -181,6 +181,9 @@ function Popup({ remote }: { remote: boolean }) {
     }
   };
 
+  /** Opens the folder that holds a bookmark and points at it. */
+  const focusHash = (folder: string, id: string) => `#/folder/${encodeURIComponent(folder)}?focus=${encodeURIComponent(id)}`;
+
   const openManager = (hash = '') => {
     void browser.tabs.create({ url: browser.runtime.getURL('/manager.html') + hash });
     window.close();
@@ -204,7 +207,7 @@ function Popup({ remote }: { remote: boolean }) {
             }}
           />
         </div>
-        <IconButton label={t('popupOpenManager')} onClick={() => openManager()}>
+        <IconButton label={t('popupOpenManager')} onClick={() => openManager(existing ? focusHash(existing.parent, existing.id) : '')}>
           <LayoutDashboard className="size-4" />
         </IconButton>
       </header>
@@ -329,7 +332,7 @@ function Popup({ remote }: { remote: boolean }) {
               {!dirty ? t('savedState') : existing ? t('saveChanges') : t('popupSave')}
             </Button>
             {existing && (
-              <Button onClick={() => openManager()} icon={<ExternalLink className="size-4" />}>
+              <Button onClick={() => openManager(focusHash(existing.parent, existing.id))} icon={<ExternalLink className="size-4" />}>
                 {t('popupOpenManager')}
               </Button>
             )}

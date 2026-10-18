@@ -93,3 +93,19 @@ body {
 .animate-in {
   animation: xz-in 0.16s ease-out;
 }
+
+/* A bookmark the user was sent to: a short pulsing ring. */
+@keyframes xz-flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  30%,
+  70% {
+    box-shadow: 0 0 0 4px var(--accent);
+  }
+}
+
+.xz-flash {
+  animation: xz-flash 1.3s ease-in-out 2;
+}

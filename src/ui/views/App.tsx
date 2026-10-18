@@ -44,6 +44,7 @@ function Shell({ remote }: { remote: boolean }) {
   const [adding, setAdding] = useState(false);
   const [newFolderIn, setNewFolderIn] = useState<string | null>(null);
   const [quick, setQuick] = useState(false);
+  const [focus, setFocus] = useState<string | null>(null);
 
   // Ctrl+K / Cmd+K opens the floating search from anywhere in Xezina.
   useEffect(() => {
@@ -67,11 +68,12 @@ function Shell({ remote }: { remote: boolean }) {
 
   // "#/library/all?edit=<id>" (from a notification) opens that bookmark's details.
   useEffect(() => {
-    const id = new URLSearchParams(search ?? '').get('edit');
-    if (id) {
-      setDetails(id);
-      go(path);
-    }
+    const params = new URLSearchParams(search ?? '');
+    const id = params.get('edit');
+    const f = params.get('focus');
+    if (id) setDetails(id);
+    if (f) setFocus(f);
+    if (id || f) go(path);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
@@ -104,6 +106,8 @@ function Shell({ remote }: { remote: boolean }) {
             openDetails={setDetails}
             onAdd={() => setAdding(true)}
             remote={remote}
+            focus={focus}
+            onFocused={() => setFocus(null)}
           />
         )}
         {page === 'dashboard' && <Dashboard lib={lib} go={goAndReset} />}

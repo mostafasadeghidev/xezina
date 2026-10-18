@@ -64,6 +64,8 @@ export function LibraryView({
   openDetails,
   onAdd,
   remote,
+  focus,
+  onFocused,
 }: {
   lib: Lib;
   filter: Filter;
@@ -73,6 +75,9 @@ export function LibraryView({
   openDetails: (id: string) => void;
   onAdd: () => void;
   remote: boolean;
+  /** Bookmark to scroll to and flash once (e.g. opened from the popup). */
+  focus?: string | null;
+  onFocused?: () => void;
 }) {
   const { t, num } = useI18n();
   const toast = useToast();
@@ -110,6 +115,20 @@ export function LibraryView({
   }, [setQuery]);
 
   const items = useMemo(() => select(lib, filter, query, sort), [lib, filter, query, sort]);
+
+  useEffect(() => {
+    if (!focus) return;
+    const timer = setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(`[data-bm="${CSS.escape(focus)}"]`);
+      if (el) {
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        el.classList.add('xz-flash');
+        setTimeout(() => el.classList.remove('xz-flash'), 2600);
+      }
+      onFocused?.();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [focus, items, onFocused]);
   const folderNode = filter.kind === 'folder' ? lib.tree.byId.get(filter.id) : undefined;
   const subfolders = !query && folderNode ? folderNode.children.filter((c) => c.kind === 'folder') : [];
 
@@ -476,6 +495,7 @@ function CardItem({
   return (
     <div
       draggable
+      data-bm={node.id}
       onDragStart={onDragStart}
       className={cx(
         'cv-auto group relative flex flex-col overflow-hidden rounded-xl border bg-card transition hover:-translate-y-0.5 hover:shadow-lg',
@@ -577,6 +597,7 @@ function Row({
   return (
     <div
       draggable
+      data-bm={node.id}
       onDragStart={onDragStart}
       className={cx(
         'group flex items-center gap-3 border-b border-line px-3 last:border-b-0 hover:bg-hover',
@@ -731,6 +752,7 @@ function Tile({
   return (
     <div
       draggable
+      data-bm={node.id}
       onDragStart={onDragStart}
       className={cx(
         'cv-auto group relative flex flex-col items-center rounded-xl border bg-card p-3 text-center transition hover:-translate-y-0.5 hover:shadow-md',

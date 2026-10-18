@@ -172,6 +172,17 @@ try {
   await page.screenshot({ path: path.join(SHOTS, 'f4-folder-picker.png') });
   await page.keyboard.press('Escape');
 
+  console.log('7. Open Xezina from the popup goes to the bookmark folder');
+  const all7 = await records(page);
+  const fonts = all7.find((r) => r.v.url === 'https://fonts.google.com/' && !r.v.del);
+  await page.goto('about:blank');
+  await page.goto(url('manager.html', `#/folder/${encodeURIComponent(fonts.v.parent)}?focus=${fonts.id}`));
+  await page.waitForSelector('h1');
+  await sleep(600);
+  assert((await page.locator('h1').first().textContent())?.includes('Typography'), 'the folder holding the bookmark is open');
+  assert((await page.locator(`[data-bm="${fonts.id}"].xz-flash`).count()) === 1, 'the bookmark is pointed out');
+  assert(!page.url().includes('focus='), 'the address is cleaned up afterwards');
+
   console.log('5. no new tab override');
   const manifest = await sw.evaluate(() => chrome.runtime.getManifest());
   assert(!manifest.chrome_url_overrides, 'the browser keeps its own new tab page');
