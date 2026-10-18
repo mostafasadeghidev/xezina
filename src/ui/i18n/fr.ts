@@ -275,4 +275,5 @@ export const fr: Strings = {
   siteOnly: "Site seul",
   savedState: "Enregistré",
   saveChanges: "Enregistrer les modifications",
+  withScreenshot: "Enregistrer une capture de cette page",
 };

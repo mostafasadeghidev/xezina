@@ -275,4 +275,5 @@ export const fa: Strings = {
   siteOnly: "فقط خودِ سایت",
   savedState: "ذخیره شده",
   saveChanges: "ذخیرهٔ تغییرات",
+  withScreenshot: "ذخیرهٔ عکسِ این صفحه",
 };

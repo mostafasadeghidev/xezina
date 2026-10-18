@@ -275,4 +275,5 @@ export const ckb: Strings = {
   siteOnly: "تەنها ماڵپەڕ",
   savedState: "پاشەکەوت کراوە",
   saveChanges: "پاشەکەوتکردنی گۆڕانکارییەکان",
+  withScreenshot: "پاشەکەوتکردنی وێنەی ئەم پەڕەیە",
 };

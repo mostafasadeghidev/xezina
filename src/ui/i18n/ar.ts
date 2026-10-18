@@ -275,4 +275,5 @@ export const ar: Strings = {
   siteOnly: "الموقع فقط",
   savedState: "محفوظ",
   saveChanges: "حفظ التغييرات",
+  withScreenshot: "حفظ لقطة لهذه الصفحة",
 };

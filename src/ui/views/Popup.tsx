@@ -58,6 +58,14 @@ function Popup({ remote }: { remote: boolean }) {
     }
   });
   const [busy, setBusy] = useState(false);
+  // Save a screenshot of the page as its preview (remembered).
+  const [shot, setShot] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('xz.saveShot') !== '0';
+    } catch {
+      return true;
+    }
+  });
   const [newId, setNewId] = useState<string | null>(null);
   /** Set when Xezina opened this window right after the browser's star was used. */
   const [starId, setStarId] = useState<string | null>(null);
@@ -135,6 +143,7 @@ function Popup({ remote }: { remote: boolean }) {
           await send({ type: 'edit', id: existing.id, title, url: newUrl && newUrl !== existing.url ? newUrl : undefined });
         // Keep showing this bookmark even if its address no longer matches the tab.
         setNewId(existing.id);
+        if (shot && tab && existing.rec.v.imgSrc !== 'shot' && existing.rec.v.imgSrc !== 'user') await takeShot(existing.id);
         await send({ type: 'meta', ids: [existing.id], patch: { notes, tags } });
         if (parent !== existing.parent) await send({ type: 'move', ids: [existing.id], parent });
         toast(t('saved'));
@@ -145,6 +154,7 @@ function Popup({ remote }: { remote: boolean }) {
         const id = await send<string | null>({ type: 'create', parent, title: title || target, url: target });
         if (id) {
           setNewId(id);
+          if (shot) await takeShot(id);
           if (notes || tags.length) await send({ type: 'meta', ids: [id], patch: { notes, tags } });
         }
         try {
@@ -158,6 +168,16 @@ function Popup({ remote }: { remote: boolean }) {
       toast((e as Error).message, 'error');
     } finally {
       setBusy(false);
+    }
+  };
+
+  /** Screenshot of the page behind this popup; allowed because the user opened the popup. */
+  const takeShot = async (id: string) => {
+    if (!tab || !/^https?:/i.test(tab.url)) return;
+    try {
+      await send({ type: 'capture', tabId: tab.id, windowId: tab.windowId, id });
+    } catch {
+      // e.g. opened automatically after the star without page access
     }
   };
 
@@ -278,6 +298,25 @@ function Popup({ remote }: { remote: boolean }) {
             className="!min-h-20 text-[13px]"
           />
           <TagInput value={tags} onChange={setTags} suggestions={lib.tags.map(([x]) => x)} placeholder={t('tagsPlaceholder')} />
+          {tab && /^https?:/i.test(tab.url) && (!existing || dirty || (existing.rec.v.imgSrc !== 'shot' && existing.rec.v.imgSrc !== 'user')) && (
+            <label className="flex cursor-pointer items-center gap-2 text-[13px] text-muted">
+              <input
+                type="checkbox"
+                checked={shot}
+                onChange={(e) => {
+                  setShot(e.target.checked);
+                  try {
+                    localStorage.setItem('xz.saveShot', e.target.checked ? '1' : '0');
+                  } catch {
+                    // ignore
+                  }
+                }}
+                className="size-4 accent-[var(--accent)]"
+              />
+              <Camera className="size-3.5" />
+              {t('withScreenshot')}
+            </label>
+          )}
           <div className="flex items-center gap-2 pt-1">
             <Button
               variant="primary"

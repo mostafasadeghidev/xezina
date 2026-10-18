@@ -275,4 +275,5 @@ export const de: Strings = {
   siteOnly: "Nur Website",
   savedState: "Gespeichert",
   saveChanges: "Änderungen speichern",
+  withScreenshot: "Screenshot dieser Seite speichern",
 };

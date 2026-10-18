@@ -274,6 +274,7 @@ export const en = {
   siteOnly: "Site only",
   savedState: "Saved",
   saveChanges: "Save changes",
+  withScreenshot: "Save a screenshot of this page",
 };
 
 export type Strings = typeof en;
