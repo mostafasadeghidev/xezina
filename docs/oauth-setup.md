@@ -65,7 +65,8 @@ Users can always use a fine-grained token instead. For one-click sign-in:
 
 1. <https://github.com/settings/developers> → *New OAuth App* → homepage
    `https://mostafasadeghidev.github.io/xezina/`, callback the same URL.
-2. Tick **Enable Device Flow**.
+2. Tick **Enable Device Flow**; leave **Expire user access tokens** unticked (Xezina keeps one
+   long-lived token per browser).
 3. Copy the client id to `WXT_GITHUB_CLIENT_ID`.
 
 Xezina then creates a private `xezina` repository in the user's account (or `xezina-data`
