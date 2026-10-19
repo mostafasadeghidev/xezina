@@ -16,7 +16,7 @@ const CONFIG = path.resolve('.local-install.json');
 const SRC = path.resolve('.output/chrome-mv3');
 
 let target = process.argv[2];
-if (target) writeFileSync(CONFIG, JSON.stringify({ target }, null, 2));
+if (target) writeFileSync(CONFIG, JSON.stringify({ target, fixedId: true }, null, 2));
 else if (existsSync(CONFIG)) target = JSON.parse(readFileSync(CONFIG, 'utf8')).target;
 if (!target) {
   console.error('Tell me the folder once:  pnpm local -- "C:\\path\\to\\xezina-chrome"');
@@ -47,6 +47,15 @@ if (existsSync(target)) {
 }
 
 cpSync(SRC, target, { recursive: true });
+// An install made before Xezina had a fixed id keeps its old id (and with it its
+// notes, tags and images) until you opt in with "fixedId": true in .local-install.json.
+const local = existsSync(CONFIG) ? JSON.parse(readFileSync(CONFIG, 'utf8')) : {};
+if (!local.fixedId) {
+  const mf = path.join(target, 'manifest.json');
+  const manifest = JSON.parse(readFileSync(mf, 'utf8'));
+  delete manifest.key;
+  writeFileSync(mf, JSON.stringify(manifest));
+}
 const version = JSON.parse(readFileSync(path.join(SRC, 'manifest.json'), 'utf8')).version;
 // The running extension watches this file and reloads itself when it changes.
 writeFileSync(path.join(target, 'build.json'), JSON.stringify({ version, builtAt: Date.now() }));

@@ -137,7 +137,7 @@ export const de: Strings = {
   saveAndConnect: 'Speichern und verbinden',
   signInWith: 'Mit {name} anmelden',
   providerGdrive: 'Google Drive',
-  providerGdriveHint: 'Versteckter App-Ordner in Ihrem Drive',
+  providerGdriveHint: "Ein Ordner „Xezina“ in Ihrem Drive",
   providerDropbox: 'Dropbox',
   providerDropboxHint: 'Ordner Apps/Xezina',
   providerOnedrive: 'OneDrive',

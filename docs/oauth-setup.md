@@ -11,11 +11,13 @@ cp .env.example .env   # then fill in the ids and rebuild
 Users can also paste their own ids under **Settings → Advanced**, which shows the exact
 redirect address to register. Extension redirect addresses look like:
 
-- Chrome / Edge / Brave: `https://<extension-id>.chromiumapp.org/`
-- Firefox: `https://<hash>.extensions.allizom.org/`
+- Chrome / Edge / Brave: `https://fpihconfdbhongoogejkdhcjlafgfhbg.chromiumapp.org/`
+- Firefox: `https://cf008288d841bdda5652bd4ecfc577d39bf05031.extensions.allizom.org/`
 
-A store-installed extension has a fixed id; an unpacked one gets an id from its folder path.
-Register every redirect address you use.
+The Chromium id is fixed by the public key in `keys/public.txt` (the `key` field of the
+manifest), so every install of this build, packed or unpacked, has the same id and address.
+Builds from a fork with its own key get their own id; Settings → Advanced always shows the
+address in use.
 
 No personal identity verification is needed for any of these.
 
@@ -25,7 +27,8 @@ No personal identity verification is needed for any of these.
 2. *OAuth consent screen* (Google Auth Platform → Branding/Audience): External; app name
    "Xezina"; home page `https://mostafasadeghidev.github.io/xezina/`; privacy policy
    `https://mostafasadeghidev.github.io/xezina/privacy.html`.
-3. *Data access* → add scope `https://www.googleapis.com/auth/drive.appdata` (non-sensitive).
+3. *Data access* → add scope `https://www.googleapis.com/auth/drive.file` (non-sensitive).
+   Xezina keeps its data in a visible "Xezina" folder and only sees files it created.
 4. *Audience* → **Publish app** (In production). With only non-sensitive scopes, Google does not
    require a review, and there is no 100-user limit or 7-day token expiry.
 5. *Clients* → Create client → **Web application** → add the redirect addresses above as
@@ -37,7 +40,7 @@ silently.
 ## Dropbox
 
 1. <https://www.dropbox.com/developers/apps> → *Create app* → **Scoped access** → **App folder** →
-   name "Xezina".
+   name "Xezina" (users then find their data in `Apps/Xezina`).
 2. *Permissions*: `files.content.read`, `files.content.write` → Submit.
 3. *Settings → OAuth 2 → Redirect URIs*: add the redirect addresses.
 4. Copy the **App key** to `WXT_DROPBOX_CLIENT_ID`.
@@ -47,7 +50,7 @@ silently.
 ## OneDrive (Microsoft)
 
 1. <https://entra.microsoft.com/> (a personal Microsoft account works) → *App registrations* →
-   New registration → "Xezina" → *Accounts in any organizational directory and personal
+   New registration → "Xezina" (the OneDrive folder becomes `Apps/Xezina`) → *Accounts in any organizational directory and personal
    Microsoft accounts*.
 2. *Authentication* → Add a platform → **Single-page application** → add the redirect addresses.
 3. *API permissions* → Microsoft Graph → delegated → `Files.ReadWrite.AppFolder`, `offline_access`.
@@ -65,4 +68,5 @@ Users can always use a fine-grained token instead. For one-click sign-in:
 2. Tick **Enable Device Flow**.
 3. Copy the client id to `WXT_GITHUB_CLIENT_ID`.
 
-Xezina then creates a private `xezina-data` repository in the user's account.
+Xezina then creates a private `xezina` repository in the user's account (or `xezina-data`
+when that name is already taken by another repository).

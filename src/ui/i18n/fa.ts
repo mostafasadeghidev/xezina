@@ -137,7 +137,7 @@ export const fa: Strings = {
   saveAndConnect: 'ذخیره و اتصال',
   signInWith: 'ورود با {name}',
   providerGdrive: 'Google Drive',
-  providerGdriveHint: 'پوشهٔ پنهان برنامه در Drive شما',
+  providerGdriveHint: "پوشهٔ «Xezina» در Drive شما",
   providerDropbox: 'Dropbox',
   providerDropboxHint: 'پوشهٔ Apps/Xezina',
   providerOnedrive: 'OneDrive',

@@ -106,14 +106,24 @@ interface DriveFile {
   size?: string;
 }
 
+const DRIVE = 'https://www.googleapis.com/drive/v3/files';
+const FOLDER = 'application/vnd.google-apps.folder';
+
+/** Name of the folder Xezina keeps in the user's Drive. */
+export const DRIVE_FOLDER = 'Xezina';
+
 /**
- * Google Drive's hidden app-data folder: invisible in Drive, only this app
- * can read it, and it needs no sensitive permission (no Google review).
- * Drive has no real paths there, so the path is the file name.
+ * A visible "Xezina" folder in the user's Google Drive (with sub-folders such
+ * as "devices"). The drive.file permission only lets Xezina see what it
+ * created itself, so it needs no Google review and cannot read other files.
  */
 export class GoogleDriveStorage implements RemoteStorage {
   readonly id: string;
-  private ids = new Map<string, string>();
+  /** Folder path ('' = the Xezina folder) → Drive id. */
+  private folders = new Map<string, string>();
+  /** File path → Drive id. */
+  private files = new Map<string, string>();
+
   constructor(
     cfg: OAuthStorageConfig,
     private tokens: TokenSource,
@@ -121,64 +131,95 @@ export class GoogleDriveStorage implements RemoteStorage {
     this.id = `gdrive:${cfg.connection}`;
   }
 
-  private async query(q: string): Promise<DriveFile[]> {
-    const out: DriveFile[] = [];
-    let page = '';
-    do {
-      const p = new URLSearchParams({
-        spaces: 'appDataFolder',
-        q,
-        fields: 'nextPageToken,files(id,name,md5Checksum,modifiedTime,size)',
-        pageSize: '1000',
-      });
-      if (page) p.set('pageToken', page);
-      const res = await authed(this.tokens, `https://www.googleapis.com/drive/v3/files?${p}`);
-      const json = (await res.json()) as { files: DriveFile[]; nextPageToken?: string };
-      out.push(...json.files);
-      page = json.nextPageToken ?? '';
-    } while (page);
-    for (const f of out) this.ids.set(f.name, f.id);
-    return out;
-  }
-
   private quote(s: string) {
     return `'${s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
   }
 
-  async list(dir: string): Promise<RemoteFile[]> {
-    const prefix = dir ? joinPath(dir) + '/' : '';
-    // Drive's name search is word-based, so list everything and filter here.
-    const files = await this.query('trashed = false');
-    return files
-      .filter((f) => f.name.startsWith(prefix) && !f.name.slice(prefix.length).includes('/'))
-      .map((f) => ({
-        name: f.name.slice(prefix.length),
-        etag: f.md5Checksum || f.modifiedTime || f.id,
-        size: Number(f.size) || 0,
-      }));
+  private async query(q: string, extra: Record<string, string> = {}): Promise<DriveFile[]> {
+    const out: DriveFile[] = [];
+    let page = '';
+    do {
+      const p = new URLSearchParams({
+        q,
+        fields: 'nextPageToken,files(id,name,md5Checksum,modifiedTime,size)',
+        pageSize: '1000',
+        spaces: 'drive',
+        ...extra,
+      });
+      if (page) p.set('pageToken', page);
+      const res = await authed(this.tokens, `${DRIVE}?${p}`);
+      const json = (await res.json()) as { files: DriveFile[]; nextPageToken?: string };
+      out.push(...json.files);
+      page = json.nextPageToken ?? '';
+    } while (page);
+    return out;
   }
 
-  private async idOf(path: string): Promise<string | undefined> {
-    const name = joinPath(path);
-    if (this.ids.has(name)) return this.ids.get(name);
-    const found = await this.query(`name = ${this.quote(name)} and trashed = false`);
+  /** Id of a folder ('' = Xezina itself, 'devices', …), created when `create` is set. */
+  private async folder(path: string, create: boolean): Promise<string | undefined> {
+    const key = joinPath(path);
+    const known = this.folders.get(key);
+    if (known) return known;
+    const parts = key ? key.split('/') : [];
+    const name = parts.length ? parts[parts.length - 1] : DRIVE_FOLDER;
+    const parent = parts.length ? await this.folder(parts.slice(0, -1).join('/'), create) : 'root';
+    if (!parent) return undefined;
+    // Oldest first, so two devices that created the folder at once agree on one.
+    const found = await this.query(`mimeType = '${FOLDER}' and name = ${this.quote(name)} and ${this.quote(parent)} in parents and trashed = false`, {
+      orderBy: 'createdTime',
+    });
+    let id = found[0]?.id;
+    if (!id && create) {
+      const res = await authed(this.tokens, `${DRIVE}?fields=id`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, mimeType: FOLDER, parents: [parent] }),
+      });
+      id = ((await res.json()) as { id: string }).id;
+    }
+    if (id) this.folders.set(key, id);
+    return id;
+  }
+
+  private split(path: string): [string, string] {
+    const p = joinPath(path);
+    const i = p.lastIndexOf('/');
+    return i < 0 ? ['', p] : [p.slice(0, i), p.slice(i + 1)];
+  }
+
+  async list(dir: string): Promise<RemoteFile[]> {
+    const id = await this.folder(dir, false);
+    if (!id) return [];
+    const files = await this.query(`${this.quote(id)} in parents and mimeType != '${FOLDER}' and trashed = false`);
+    for (const f of files) this.files.set(joinPath(dir, f.name), f.id);
+    return files.map((f) => ({ name: f.name, etag: f.md5Checksum || f.modifiedTime || f.id, size: Number(f.size) || 0 }));
+  }
+
+  private async fileId(path: string): Promise<string | undefined> {
+    const key = joinPath(path);
+    if (this.files.has(key)) return this.files.get(key);
+    const [dir, name] = this.split(key);
+    const parent = await this.folder(dir, false);
+    if (!parent) return undefined;
+    const found = await this.query(`name = ${this.quote(name)} and ${this.quote(parent)} in parents and trashed = false`);
+    if (found[0]) this.files.set(key, found[0].id);
     return found[0]?.id;
   }
 
   async get(path: string): Promise<Uint8Array | null> {
-    const id = await this.idOf(path);
+    const id = await this.fileId(path);
     if (!id) return null;
-    const res = await authed(this.tokens, `https://www.googleapis.com/drive/v3/files/${id}?alt=media`, { allow: [404] });
+    const res = await authed(this.tokens, `${DRIVE}/${id}?alt=media`, { allow: [404] });
     if (res.status === 404) {
-      this.ids.delete(joinPath(path));
+      this.files.delete(joinPath(path));
       return null;
     }
     return bytesOf(res);
   }
 
   async put(path: string, data: Uint8Array): Promise<void> {
-    const name = joinPath(path);
-    const id = await this.idOf(name);
+    const key = joinPath(path);
+    const id = await this.fileId(key);
     if (id) {
       const res = await authed(this.tokens, `https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media`, {
         method: 'PATCH',
@@ -187,10 +228,12 @@ export class GoogleDriveStorage implements RemoteStorage {
         allow: [404],
       });
       if (res.status !== 404) return;
-      this.ids.delete(name);
+      this.files.delete(key);
     }
+    const [dir, name] = this.split(key);
+    const parent = (await this.folder(dir, true)) as string;
     const boundary = 'xezina' + Math.random().toString(36).slice(2);
-    const meta = JSON.stringify({ name, parents: ['appDataFolder'] });
+    const meta = JSON.stringify({ name, parents: [parent] });
     const enc = new TextEncoder();
     const head = enc.encode(
       `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/octet-stream\r\n\r\n`,
@@ -205,15 +248,14 @@ export class GoogleDriveStorage implements RemoteStorage {
       headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
       body: body as BodyInit,
     });
-    const json = (await res.json()) as { id: string };
-    this.ids.set(name, json.id);
+    this.files.set(key, ((await res.json()) as { id: string }).id);
   }
 
   async delete(path: string): Promise<void> {
-    const id = await this.idOf(path);
+    const id = await this.fileId(path);
     if (!id) return;
-    await authed(this.tokens, `https://www.googleapis.com/drive/v3/files/${id}`, { method: 'DELETE', allow: [404] });
-    this.ids.delete(joinPath(path));
+    await authed(this.tokens, `${DRIVE}/${id}`, { method: 'DELETE', allow: [404] });
+    this.files.delete(joinPath(path));
   }
 }
 

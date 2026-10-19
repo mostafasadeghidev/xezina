@@ -136,7 +136,7 @@ export const en = {
   saveAndConnect: 'Save and connect',
   signInWith: 'Sign in with {name}',
   providerGdrive: 'Google Drive',
-  providerGdriveHint: 'Hidden app folder in your Drive',
+  providerGdriveHint: "A “Xezina” folder in your Drive",
   providerDropbox: 'Dropbox',
   providerDropboxHint: 'Apps/Xezina folder',
   providerOnedrive: 'OneDrive',

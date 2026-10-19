@@ -25,7 +25,7 @@ import type { Settings as SettingsT } from '../../lib/settings';
 import { guessDeviceName } from '../../lib/settings';
 import type { DeviceCode, GitHubConfig } from '../../storage/github';
 import { BUILT_IN_CLIENT_IDS } from '../../storage/oauth';
-import { originsFor, type RemoteConfig, type RemoteType } from '../../storage/registry';
+import { isOAuth, originsFor, type RemoteConfig, type RemoteType } from '../../storage/registry';
 import type { S3Config } from '../../storage/s3';
 import type { WebDavConfig } from '../../storage/webdav';
 import { Badge, Button, Card, cx, Field, Input, Select, Switch, useConfirm, useToast } from '../components/ui';
@@ -270,7 +270,11 @@ function SyncTab() {
             {PROVIDERS.map((p) => (
               <button
                 key={p.type}
-                onClick={() => setPicked(p.type)}
+                onClick={() => {
+                  const builtIn = isOAuth(p.type) && (s.clientIds[p.type] || BUILT_IN_CLIENT_IDS[p.type]);
+                  if (builtIn) void run('oauth', () => send({ type: 'oauth:connect', provider: p.type as 'dropbox' | 'gdrive' | 'onedrive' }), t('done'));
+                  else setPicked(p.type);
+                }}
                 className={cx(
                   'flex items-start gap-3 rounded-xl border p-4 text-start transition hover:border-accent/50 hover:bg-hover',
                   picked === p.type ? 'border-accent bg-accent-soft/40 ring-2 ring-accent/20' : 'border-line',
@@ -565,6 +569,26 @@ function GitHubForm({ onError }: { onError: (m: string) => void }) {
     }
   };
 
+  const tokenForm = (
+    <>
+      <ConfigForm<GitHubConfig>
+        initial={{ type: 'github', token: '', owner: '', repo: '', branch: '', dir: 'xezina' }}
+        fields={[
+          { key: 'token', label: t('fieldToken'), hint: t('fieldTokenHint'), secret: true },
+          { key: 'owner', label: t('fieldOwner'), ltr: true },
+          { key: 'repo', label: t('fieldRepo'), ltr: true },
+          { key: 'branch', label: t('fieldBranch'), ltr: true },
+          { key: 'dir', label: t('fieldFolder'), ltr: true },
+        ]}
+        title={hasClient ? t('orUseToken') : t('providerGithub')}
+      />
+      <a href={tokenUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm text-accent hover:underline">
+        {t('createToken')}
+        <ExternalLink className="size-3.5" />
+      </a>
+    </>
+  );
+
   return (
     <>
       {hasClient && (
@@ -596,21 +620,14 @@ function GitHubForm({ onError }: { onError: (m: string) => void }) {
           )}
         </Section>
       )}
-      <ConfigForm<GitHubConfig>
-        initial={{ type: 'github', token: '', owner: '', repo: 'xezina-data', branch: '', dir: 'xezina' }}
-        fields={[
-          { key: 'token', label: t('fieldToken'), hint: t('fieldTokenHint'), secret: true },
-          { key: 'owner', label: t('fieldOwner'), ltr: true },
-          { key: 'repo', label: t('fieldRepo'), ltr: true },
-          { key: 'branch', label: t('fieldBranch'), ltr: true },
-          { key: 'dir', label: t('fieldFolder'), ltr: true },
-        ]}
-        title={hasClient ? t('orUseToken') : t('providerGithub')}
-      />
-      <a href={tokenUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm text-accent hover:underline">
-        {t('createToken')}
-        <ExternalLink className="size-3.5" />
-      </a>
+      {hasClient ? (
+        <details className="rounded-xl border border-line bg-panel p-4 text-sm">
+          <summary className="cursor-pointer text-muted">{t('orUseToken')}</summary>
+          <div className="mt-4 space-y-3">{tokenForm}</div>
+        </details>
+      ) : (
+        tokenForm
+      )}
     </>
   );
 }

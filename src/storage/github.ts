@@ -121,25 +121,48 @@ export async function githubUser(token: string): Promise<string> {
   return ((await res.json()) as { login: string }).login;
 }
 
-/** Creates a private repository for Xezina data unless it already exists. */
+const DATA_DESCRIPTION = 'Xezina bookmark sync data (private)';
+
+/**
+ * Uses (or creates) the given repository. A public repository is refused, so
+ * bookmarks never end up in the open.
+ */
 export async function ensureRepo(token: string, owner: string, repo: string): Promise<{ branch: string }> {
   const res = await request(`${API}/repos/${owner}/${repo}`, { headers: headers(token), allow: [404] });
   if (res.ok) {
     const json = (await res.json()) as { default_branch: string; private: boolean };
+    if (!json.private) throw new Error(`"${repo}" is a public repository; choose another name.`);
     return { branch: json.default_branch };
   }
   const created = await request(`${API}/user/repos`, {
     method: 'POST',
     headers: { ...headers(token), 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: repo,
-      private: true,
-      auto_init: true,
-      description: 'Xezina bookmark sync data (private)',
-    }),
+    body: JSON.stringify({ name: repo, private: true, auto_init: true, description: DATA_DESCRIPTION }),
   });
   const json = (await created.json()) as { default_branch: string };
   return { branch: json.default_branch || 'main' };
+}
+
+/**
+ * The private repository Xezina syncs to: "xezina" when that name is free or
+ * already Xezina's; otherwise (e.g. the account that hosts the project's own
+ * "xezina" repository) "xezina-data", then "xezina-sync". An existing one is reused.
+ */
+export async function ensureDataRepo(token: string, owner: string): Promise<{ repo: string; branch: string }> {
+  const names = ['xezina', 'xezina-data', 'xezina-sync'];
+  let free = '';
+  // An existing Xezina data repository wins (older versions used "xezina-data").
+  for (const repo of names) {
+    const res = await request(`${API}/repos/${owner}/${repo}`, { headers: headers(token), allow: [404] });
+    if (res.status === 404) {
+      free ||= repo;
+      continue;
+    }
+    const json = (await res.json()) as { default_branch: string; private: boolean; description: string | null };
+    if (json.private && json.description === DATA_DESCRIPTION) return { repo, branch: json.default_branch };
+  }
+  if (free) return { repo: free, ...(await ensureRepo(token, owner, free)) };
+  throw new Error('Could not find a free repository name for Xezina; enter one in the token form.');
 }
 
 export interface DeviceCode {

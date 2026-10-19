@@ -1,5 +1,10 @@
 import { defineConfig } from 'wxt';
 import tailwindcss from '@tailwindcss/vite';
+import { readFileSync } from 'node:fs';
+
+// Public half of keys/xezina.pem: gives Chrome/Edge the same extension id on every
+// install, so OAuth redirect addresses (https://<id>.chromiumapp.org/) never change.
+const PUBLIC_KEY = readFileSync('keys/public.txt', 'utf8').trim();
 
 // https://wxt.dev/api/config.html
 export default defineConfig({
@@ -10,6 +15,7 @@ export default defineConfig({
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
+    ...(browser === 'firefox' ? {} : { key: PUBLIC_KEY }),
     permissions: [
       'bookmarks',
       'storage',

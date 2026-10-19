@@ -7,3 +7,6 @@ stats.html
 web-ext.config.ts
 .claude/
 .local-install.json
+
+# Private signing key (keeps the extension id); never commit.
+keys/*.pem

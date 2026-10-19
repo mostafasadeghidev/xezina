@@ -8,7 +8,7 @@ import { db, DEFAULT_STATUS, kvGet, kvSet, loadDevice, saveDevice, type EnrichSt
 import { dataUrlToBlob, downloadImage, hashBlob, makePreview } from '../enrich/images';
 import { fetchPage, findFix, isProtectedPage } from '../enrich/metadata';
 import { getSettings, guessDeviceName, saveSettings, type Settings } from '../lib/settings';
-import { ensureRepo, githubDevicePoll, githubDeviceStart, githubUser, type DeviceCode } from '../storage/github';
+import { ensureDataRepo, ensureRepo, githubDevicePoll, githubDeviceStart, githubUser, type DeviceCode } from '../storage/github';
 import { BUILT_IN_CLIENT_IDS, signIn, tokenSource } from '../storage/oauth';
 import { createRemote, isOAuth, type RemoteConfig } from '../storage/registry';
 import type { RemoteStorage } from '../storage/types';
@@ -698,8 +698,14 @@ export async function testRemote(cfg: RemoteConfig): Promise<{ files: number; en
 export async function setRemote(cfg: RemoteConfig | null) {
   if (cfg?.type === 'github') {
     if (!cfg.owner) cfg.owner = await githubUser(cfg.token);
-    const { branch } = await ensureRepo(cfg.token, cfg.owner, cfg.repo || 'xezina-data');
-    if (!cfg.branch) cfg.branch = branch;
+    if (cfg.repo) {
+      const { branch } = await ensureRepo(cfg.token, cfg.owner, cfg.repo);
+      if (!cfg.branch) cfg.branch = branch;
+    } else {
+      const { repo, branch } = await ensureDataRepo(cfg.token, cfg.owner);
+      cfg.repo = repo;
+      if (!cfg.branch) cfg.branch = branch;
+    }
   }
   await saveSettings({ remote: cfg, ...(cfg && isOAuth(cfg.type) ? {} : { tokens: null }) });
   await setStatus({ ...DEFAULT_STATUS });
@@ -727,8 +733,8 @@ export async function githubFinish(code: DeviceCode) {
   const clientId = s.clientIds.github || BUILT_IN_CLIENT_IDS.github;
   const token = await githubDevicePoll(clientId, code);
   const owner = await githubUser(token);
-  const { branch } = await ensureRepo(token, owner, 'xezina-data');
-  await setRemote({ type: 'github', token, owner, repo: 'xezina-data', branch, dir: 'xezina' });
+  const { repo, branch } = await ensureDataRepo(token, owner);
+  await setRemote({ type: 'github', token, owner, repo, branch, dir: 'xezina' });
   return { owner };
 }
 

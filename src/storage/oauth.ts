@@ -44,7 +44,8 @@ const PROVIDERS: Record<OAuthProvider, ProviderDef> = {
   },
   gdrive: {
     authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-    scope: 'https://www.googleapis.com/auth/drive.appdata',
+    // Only files Xezina created itself (its "Xezina" folder); no Google review needed.
+    scope: 'https://www.googleapis.com/auth/drive.file',
     implicit: true,
   },
 };

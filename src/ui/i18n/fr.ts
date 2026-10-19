@@ -137,7 +137,7 @@ export const fr: Strings = {
   saveAndConnect: 'Enregistrer et connecter',
   signInWith: 'Se connecter avec {name}',
   providerGdrive: 'Google Drive',
-  providerGdriveHint: 'Dossier d’application masqué dans votre Drive',
+  providerGdriveHint: "Un dossier « Xezina » dans votre Drive",
   providerDropbox: 'Dropbox',
   providerDropboxHint: 'Dossier Apps/Xezina',
   providerOnedrive: 'OneDrive',

@@ -137,7 +137,7 @@ export const ckb: Strings = {
   saveAndConnect: 'پاشەکەوت و پەیوەستبوون',
   signInWith: 'چوونەژوورەوە بە {name}',
   providerGdrive: 'Google Drive',
-  providerGdriveHint: 'بوخچەیەکی شاراوەی بەرنامە لە Drive ەکەتدا',
+  providerGdriveHint: "بوخچەی «Xezina» لە Driveـەکەتدا",
   providerDropbox: 'Dropbox',
   providerDropboxHint: 'بوخچەی Apps/Xezina',
   providerOnedrive: 'OneDrive',

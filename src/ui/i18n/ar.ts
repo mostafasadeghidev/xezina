@@ -137,7 +137,7 @@ export const ar: Strings = {
   saveAndConnect: 'حفظ واتصال',
   signInWith: 'تسجيل الدخول باستخدام {name}',
   providerGdrive: 'Google Drive',
-  providerGdriveHint: 'مجلد تطبيق مخفي في Drive لديك',
+  providerGdriveHint: "مجلد «Xezina» في Drive",
   providerDropbox: 'Dropbox',
   providerDropboxHint: 'المجلد Apps/Xezina',
   providerOnedrive: 'OneDrive',
