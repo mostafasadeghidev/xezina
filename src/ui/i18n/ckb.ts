@@ -304,4 +304,5 @@ export const ckb: Strings = {
   fixSelected: "چاککردنی هەڵبژێردراوەکان ({n})",
   undoSelected: "گەڕاندنەوەی هەڵبژێردراوەکان ({n})",
   wasAddress: "پێشتر",
+  recommended: "پێشنیارکراو",
 };

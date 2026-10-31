@@ -304,4 +304,5 @@ export const it: Strings = {
   fixSelected: "Correggi selezionati ({n})",
   undoSelected: "Annulla selezionati ({n})",
   wasAddress: "Prima",
+  recommended: "Consigliato",
 };

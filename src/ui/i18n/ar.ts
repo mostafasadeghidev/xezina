@@ -304,4 +304,5 @@ export const ar: Strings = {
   fixSelected: "إصلاح المحدد ({n})",
   undoSelected: "التراجع عن المحدد ({n})",
   wasAddress: "كان",
+  recommended: "مُوصى به",
 };

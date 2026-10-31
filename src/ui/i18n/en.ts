@@ -303,6 +303,7 @@ export const en = {
   fixSelected: "Fix selected ({n})",
   undoSelected: "Undo selected ({n})",
   wasAddress: "Was",
+  recommended: "Recommended",
 };
 
 export type Strings = typeof en;

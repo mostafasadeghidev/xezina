@@ -304,4 +304,5 @@ export const de: Strings = {
   fixSelected: "Auswahl korrigieren ({n})",
   undoSelected: "Auswahl rückgängig ({n})",
   wasAddress: "Vorher",
+  recommended: "Empfohlen",
 };

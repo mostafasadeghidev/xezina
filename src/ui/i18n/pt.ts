@@ -304,4 +304,5 @@ export const pt: Strings = {
   fixSelected: "Corrigir selecionados ({n})",
   undoSelected: "Desfazer selecionados ({n})",
   wasAddress: "Antes",
+  recommended: "Recomendado",
 };

@@ -304,4 +304,5 @@ export const fa: Strings = {
   fixSelected: "اصلاحِ انتخاب‌شده‌ها ({n})",
   undoSelected: "برگرداندنِ انتخاب‌شده‌ها ({n})",
   wasAddress: "قبلاً",
+  recommended: "پیشنهادی",
 };

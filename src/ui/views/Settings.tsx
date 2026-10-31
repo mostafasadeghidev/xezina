@@ -234,13 +234,14 @@ function Bookmarking() {
 
 // ---------------------------------------------------------------- sync
 
+// GitHub first: no user limit and nothing for the publisher to get approved.
 const PROVIDERS: { type: RemoteType; icon: ReactNode; name: StringKey; hint: StringKey }[] = [
+  { type: 'github', icon: <GithubIcon className="size-5" />, name: 'providerGithub', hint: 'providerGithubHint' },
   { type: 'gdrive', icon: <Cloud className="size-5" />, name: 'providerGdrive', hint: 'providerGdriveHint' },
-  { type: 'dropbox', icon: <Cloud className="size-5" />, name: 'providerDropbox', hint: 'providerDropboxHint' },
-  { type: 'onedrive', icon: <Cloud className="size-5" />, name: 'providerOnedrive', hint: 'providerOnedriveHint' },
   { type: 'webdav', icon: <Server className="size-5" />, name: 'providerWebdav', hint: 'providerWebdavHint' },
   { type: 's3', icon: <HardDrive className="size-5" />, name: 'providerS3', hint: 'providerS3Hint' },
-  { type: 'github', icon: <GithubIcon className="size-5" />, name: 'providerGithub', hint: 'providerGithubHint' },
+  { type: 'dropbox', icon: <Cloud className="size-5" />, name: 'providerDropbox', hint: 'providerDropboxHint' },
+  { type: 'onedrive', icon: <Cloud className="size-5" />, name: 'providerOnedrive', hint: 'providerOnedriveHint' },
 ];
 
 export function providerName(type: RemoteType, t: (k: StringKey) => string) {
@@ -267,7 +268,10 @@ function SyncTab() {
       <>
         <Section title={t('storageTitle')} hint={t('storageHint')} icon={<Cloud className="size-4" />}>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {PROVIDERS.map((p) => (
+            {PROVIDERS.filter(
+              // Sign-in providers appear once an app id exists (built in, or the user's own under Advanced).
+              (p) => !isOAuth(p.type) || s.clientIds[p.type] || BUILT_IN_CLIENT_IDS[p.type],
+            ).map((p) => (
               <button
                 key={p.type}
                 onClick={() => {
@@ -282,7 +286,12 @@ function SyncTab() {
               >
                 <span className="mt-0.5 text-accent">{p.icon}</span>
                 <span>
-                  <span className="block text-sm font-semibold">{t(p.name)}</span>
+                  <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                    {t(p.name)}
+                    {p.type === 'github' && (
+                      <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-accent">{t('recommended')}</span>
+                    )}
+                  </span>
                   <span className="mt-0.5 block text-xs text-muted">{t(p.hint)}</span>
                 </span>
               </button>
