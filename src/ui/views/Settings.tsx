@@ -9,7 +9,9 @@ import {
   ExternalLink,
   HardDrive,
   KeyRound,
+  Loader2,
   Lock,
+  Merge,
   RotateCcw,
   Server,
   ShieldCheck,
@@ -24,6 +26,7 @@ import { send } from '../../lib/messages';
 import type { Settings as SettingsT } from '../../lib/settings';
 import { guessDeviceName } from '../../lib/settings';
 import type { DeviceCode, GitHubConfig } from '../../storage/github';
+import type { FirstContact } from '../../sync/engine';
 import { BUILT_IN_CLIENT_IDS } from '../../storage/oauth';
 import { isOAuth, originsFor, type RemoteConfig, type RemoteType } from '../../storage/registry';
 import type { S3Config } from '../../storage/s3';
@@ -284,7 +287,7 @@ function SyncTab() {
                   picked === p.type ? 'border-accent bg-accent-soft/40 ring-2 ring-accent/20' : 'border-line',
                 )}
               >
-                <span className="mt-0.5 text-accent">{p.icon}</span>
+                <span className="mt-0.5 text-accent">{busy === 'oauth' && isOAuth(p.type) ? <Loader2 className="size-5 animate-spin" /> : p.icon}</span>
                 <span>
                   <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                     {t(p.name)}
@@ -328,6 +331,7 @@ function SyncTab() {
         {status.lastError && status.state !== 'idle' && status.state !== 'running' && (
           <p className="mt-3 rounded-lg bg-danger/10 p-3 text-sm text-danger">{status.lastError}</p>
         )}
+        {status.state === 'choose' && status.firstContact && <FirstSyncChoice first={status.firstContact} />}
         {status.state === 'confirm' && status.pendingDeletes && (
           <div className="mt-4 rounded-xl border border-warn/40 bg-warn/10 p-4">
             <p className="text-sm">{t('confirmMassDelete', { count: status.pendingDeletes.count, total: status.pendingDeletes.total })}</p>
@@ -387,6 +391,62 @@ function SyncTab() {
         <p className="mt-3 text-xs text-muted">{t('forcePullHint')}</p>
       </Section>
     </>
+  );
+}
+
+/** First sync with a storage that already has bookmarks: merge, take the cloud's, or take this browser's. */
+function FirstSyncChoice({ first }: { first: FirstContact }) {
+  const { t } = useI18n();
+  const confirm = useConfirm();
+  const { busy, run } = useRun();
+  const options: { key: string; title: StringKey; hint: StringKey; icon: ReactNode; go: () => Promise<unknown>; ask?: StringKey }[] = [
+    { key: 'merge', title: 'firstMerge', hint: 'firstMergeHint', icon: <Merge className="size-4" />, go: () => send({ type: 'sync', merge: true }) },
+    {
+      key: 'cloud',
+      title: 'firstCloud',
+      hint: 'firstCloudHint',
+      icon: <ArrowDownToLine className="size-4" />,
+      go: () => send({ type: 'sync', mode: 'pull' }),
+      ask: 'firstCloudAsk',
+    },
+    {
+      key: 'browser',
+      title: 'firstBrowser',
+      hint: 'firstBrowserHint',
+      icon: <ArrowUpFromLine className="size-4" />,
+      go: () => send({ type: 'sync', mode: 'push' }),
+      ask: 'firstBrowserAsk',
+    },
+  ];
+  return (
+    <div className="mt-4 rounded-xl border border-accent/40 bg-accent-soft/30 p-4">
+      <p className="text-sm font-semibold">{t('firstTitle')}</p>
+      <p className="mt-1 text-sm text-muted">
+        {t('firstHint', { local: first.local, remote: first.remote, devices: first.devices.join(', ') || '—' })}
+      </p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {options.map((o) => (
+          <button
+            key={o.key}
+            disabled={!!busy}
+            onClick={async () => {
+              if (o.ask && !(await confirm({ message: t(o.ask), ok: t(o.title), cancel: t('cancel'), danger: true }))) return;
+              void run(o.key, o.go, t('done'));
+            }}
+            className={cx(
+              'flex flex-col items-start gap-1 rounded-xl border bg-panel p-3 text-start transition hover:border-accent/50 hover:bg-hover disabled:opacity-60',
+              o.key === 'merge' ? 'border-accent/50' : 'border-line',
+            )}
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-accent">
+              {busy === o.key ? <Loader2 className="size-4 animate-spin" /> : o.icon}
+              {t(o.title)}
+            </span>
+            <span className="text-xs text-muted">{t(o.hint)}</span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

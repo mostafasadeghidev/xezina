@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { Rec, State } from '../core/types';
-import type { DeviceInfo, SyncReport } from '../sync/engine';
+import type { DeviceInfo, FirstContact, SyncReport } from '../sync/engine';
 import { emptyDeviceData, newId, type DeviceData } from '../sync/local';
 
 export interface BlobRow {
@@ -97,11 +97,13 @@ export async function saveDevice(data: DeviceData, before?: State) {
 }
 
 export interface SyncStatus {
-  state: 'idle' | 'running' | 'error' | 'confirm' | 'needs-key';
+  state: 'idle' | 'running' | 'error' | 'confirm' | 'needs-key' | 'choose';
   lastSync: number;
   lastError: string;
   /** For 'confirm': how many bookmarks the sync wants to delete. */
   pendingDeletes?: { count: number; total: number };
+  /** For 'choose': both sides hold bookmarks; how the first sync goes is the user's call. */
+  firstContact?: FirstContact;
   devices: DeviceInfo[];
 }
 

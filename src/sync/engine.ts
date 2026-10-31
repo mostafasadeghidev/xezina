@@ -7,7 +7,7 @@ import { decodeJson, encodeJson, fromBase64, NeedsKeyError, sha256Hex, toBase64 
 import { join } from './join';
 import type { DeviceData } from './local';
 import { materialize, type ApplyStats } from './materialize';
-import type { NativeApi } from './native';
+import type { NativeApi, NativeNode } from './native';
 import { scan } from './scan';
 
 export const DEVICES_DIR = 'devices';
@@ -169,6 +169,41 @@ export async function runSync(deps: EngineDeps, opts: SyncOptions = {}): Promise
   data.clock = clock.last;
   await deps.save(data);
   return report;
+}
+
+export interface FirstContact {
+  /** Bookmarks in this browser. */
+  local: number;
+  /** Bookmarks already in the storage (from other browsers). */
+  remote: number;
+  devices: string[];
+}
+
+/**
+ * Before this browser first syncs with a storage: when both sides already
+ * hold bookmarks, the user decides whether to merge them, keep the cloud copy
+ * or keep this browser's. Returns null when there is nothing to decide.
+ */
+export async function previewFirstContact(deps: EngineDeps, remote: RemoteStorage, key: CryptoKey | null): Promise<FirstContact | null> {
+  const data = await deps.load();
+  if (data.joined.includes(remote.id)) return null;
+  const count = (nodes: NativeNode[]): number => nodes.reduce((n, c) => n + (c.url ? 1 : 0) + count(c.children ?? []), 0);
+  const local = count(await deps.native.getTree());
+  if (!local) return null;
+  const own = deviceFileName(data.deviceId);
+  const incoming: State = {};
+  const devices: string[] = [];
+  for (const f of await remote.list(DEVICES_DIR)) {
+    if (!f.name.endsWith('.xz') || f.name === own) continue;
+    const bytes = await remote.get(`${DEVICES_DIR}/${f.name}`);
+    if (!bytes) continue;
+    const file = await decodeJson<DeviceFile>(bytes, key);
+    mergeState(incoming, file.state);
+    devices.push(file.device.name);
+  }
+  let remoteCount = 0;
+  for (const n of buildTree(incoming).byId.values()) if (n.kind === 'bookmark') remoteCount++;
+  return remoteCount ? { local, remote: remoteCount, devices } : null;
 }
 
 /** Reads (or creates) the remote's meta file. */

@@ -49,7 +49,7 @@ import {
 async function handle(msg: Message, sender?: { tab?: { id?: number } }): Promise<unknown> {
   switch (msg.type) {
     case 'sync':
-      return sync({ mode: msg.mode, allowMassDelete: msg.allowMassDelete });
+      return sync({ mode: msg.mode, allowMassDelete: msg.allowMassDelete, merge: msg.merge });
     case 'scan':
       return sync({ localOnly: true });
     case 'meta':

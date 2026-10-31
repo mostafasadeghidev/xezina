@@ -304,6 +304,17 @@ export const en = {
   undoSelected: "Undo selected ({n})",
   wasAddress: "Was",
   recommended: "Recommended",
+  statusChoose: "Choose how to start",
+  firstTitle: "This browser and the storage both have bookmarks",
+  firstHint: "This browser has {local} bookmarks and the storage has {remote} (from {devices}). How should the first sync go?",
+  firstMerge: "Merge both",
+  firstMergeHint: "Keep everything. Bookmarks both sides have are combined; nothing is deleted.",
+  firstCloud: "Use the cloud copy",
+  firstCloudHint: "This browser’s bookmarks are replaced by the ones in the storage. A backup is kept.",
+  firstCloudAsk: "Bookmarks that are only in this browser will be removed from it (a backup is kept). Continue?",
+  firstBrowser: "Use this browser’s",
+  firstBrowserHint: "The storage is replaced by this browser’s bookmarks; your other browsers follow on their next sync.",
+  firstBrowserAsk: "Bookmarks that are only in the storage will be removed there and from your other browsers on their next sync. Continue?",
 };
 
 export type Strings = typeof en;

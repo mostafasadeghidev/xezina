@@ -13,7 +13,7 @@ import { BUILT_IN_CLIENT_IDS, signIn, tokenSource } from '../storage/oauth';
 import { createRemote, isOAuth, type RemoteConfig } from '../storage/registry';
 import type { RemoteStorage } from '../storage/types';
 import { decodeBytes, deriveKey, encodeBytes, exportKey, fromBase64, importKey, NeedsKeyError, PBKDF2_ITERATIONS, toBase64 } from '../sync/codec';
-import { DEVICES_DIR, makeCheck, readMeta, runSync, verifyCheck, writeMeta, type SyncMode, type SyncReport } from '../sync/engine';
+import { DEVICES_DIR, makeCheck, previewFirstContact, readMeta, runSync, verifyCheck, writeMeta, type SyncMode, type SyncReport } from '../sync/engine';
 import { newId, type DeviceData } from '../sync/local';
 import { MassDeleteError } from '../sync/materialize';
 import { nativeApi } from './native-api';
@@ -45,7 +45,7 @@ async function setStatus(patch: Partial<SyncStatus>) {
 }
 
 async function updateBadge(s: SyncStatus) {
-  const text = s.state === 'error' || s.state === 'needs-key' ? '!' : s.state === 'confirm' ? '?' : '';
+  const text = s.state === 'error' || s.state === 'needs-key' ? '!' : s.state === 'confirm' || s.state === 'choose' ? '?' : '';
   const action = browser.action ?? (browser as unknown as { browserAction: typeof browser.action }).browserAction;
   try {
     await action.setBadgeText({ text });
@@ -136,6 +136,8 @@ export interface SyncRequest {
   allowMassDelete?: boolean;
   /** Only read local changes; never touch the network. */
   localOnly?: boolean;
+  /** The user chose to merge this browser with the storage on first contact. */
+  merge?: boolean;
 }
 
 /** Runs one sync round (or a local-only scan) and records the outcome. */
@@ -158,6 +160,15 @@ export function sync(req: SyncRequest = {}): Promise<SyncReport | null> {
     try {
       const key = await keyFor(settings);
       if (remote) await checkMeta(remote, key);
+      if (remote && mode === 'normal' && !req.merge) {
+        // Still waiting for the user's choice: don't download everything again every minute.
+        if ((await getStatus()).state === 'choose') return null;
+        const firstContact = await previewFirstContact(engineDeps(), remote, key);
+        if (firstContact) {
+          await setStatus({ state: 'choose', firstContact, lastError: '' });
+          return null;
+        }
+      }
       const report = await runSync(engineDeps(), {
         remote,
         key,
@@ -165,7 +176,7 @@ export function sync(req: SyncRequest = {}): Promise<SyncReport | null> {
         allowMassDelete: req.allowMassDelete,
       });
       if (remote) {
-        await setStatus({ state: 'idle', lastSync: Date.now(), lastError: '', pendingDeletes: undefined, devices: report.devices.length ? report.devices : (await getStatus()).devices });
+        await setStatus({ state: 'idle', lastSync: Date.now(), lastError: '', pendingDeletes: undefined, firstContact: undefined, devices: report.devices.length ? report.devices : (await getStatus()).devices });
         const a = report.applied;
         const didSomething =
           mode !== 'normal' || report.localChanges || report.remoteChanges || report.joined || a.created || a.updated || a.moved || a.removed;

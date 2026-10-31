@@ -23,8 +23,9 @@ export function SyncPill({ onOpen }: { onOpen: () => void }) {
         tone = 'text-danger';
         break;
       case 'confirm':
+      case 'choose':
         icon = <AlertCircle className="size-4" />;
-        label = t('statusConfirm');
+        label = t(status.state === 'choose' ? 'statusChoose' : 'statusConfirm');
         tone = 'text-warn';
         break;
       case 'needs-key':
