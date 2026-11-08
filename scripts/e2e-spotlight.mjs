@@ -1,6 +1,7 @@
 /**
  * Browser test for the search over any page (Alt+Shift+D): the frame shows
- * over a site, finds a bookmark, opens it in the same tab, and Escape closes it.
+ * over a site, finds a bookmark, opens it in a new tab (Ctrl+Enter: this one),
+ * and Escape closes it.
  *   XEZINA_E2E=1 pnpm build && node scripts/e2e-spotlight.mjs [screenshot-dir] && pnpm build
  */
 import { chromium } from 'playwright-core';
@@ -88,7 +89,7 @@ try {
   await sleep(300);
   assert((await page.locator('#xezina-spotlight').count()) === 0, 'frame removed');
 
-  console.log('4. Enter opens the bookmark in the same tab');
+  console.log('4. Enter opens the bookmark in a new tab, Ctrl+Enter in the same one');
   await page.evaluate((src) => {
     const f = document.createElement('iframe');
     f.id = 'xezina-spotlight';
@@ -99,9 +100,23 @@ try {
   await input.waitFor({ timeout: 15000 });
   await input.fill('tax');
   await frame.locator('button', { hasText: 'Tax forms' }).first().waitFor({ timeout: 5000 });
-  await input.press('Enter');
+  const [opened] = await Promise.all([ctx.waitForEvent('page'), input.press('Enter')]);
+  await opened.waitForURL(SITE + 'tax', { timeout: 5000 });
+  assert(page.url() === SITE + 'start', 'new tab opened, the page stayed');
+  await page.evaluate((src) => {
+    const f = document.createElement('iframe');
+    f.id = 'xezina-spotlight2';
+    f.src = src;
+    f.style.cssText = 'all:initial;position:fixed;inset:0;width:100vw;height:100vh;border:0;z-index:2147483647;display:block';
+    document.body.appendChild(f);
+  }, `chrome-extension://${new URL(sw.url()).host}/spotlight.html?tab=${tabId}`);
+  const input2 = page.frameLocator('#xezina-spotlight2').locator('input');
+  await input2.waitFor({ timeout: 15000 });
+  await input2.fill('tax');
+  await page.frameLocator('#xezina-spotlight2').locator('button', { hasText: 'Tax forms' }).first().waitFor({ timeout: 5000 });
+  await input2.press('Control+Enter');
   await page.waitForURL(SITE + 'tax', { timeout: 5000 });
-  assert(true, 'same tab went to the bookmark');
+  assert(true, 'Ctrl+Enter replaced the page')
 
   console.log('5. the window version (pages that cannot hold the frame)');
   const win = await ctx.newPage();

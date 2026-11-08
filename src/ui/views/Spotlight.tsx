@@ -50,9 +50,10 @@ function Search({ remote }: { remote: boolean }) {
       onClose={close}
       remote={remote}
       window={inWindow}
-      onPick={(n, newTab) => {
-        if (newTab || tabId === undefined) void browser.tabs.create({ url: n.url, openerTabId: tabId });
-        else void browser.tabs.update(tabId, { url: n.url });
+      // A new tab by default, so the page you were on stays; Ctrl+Enter replaces it.
+      onPick={(n, ctrl) => {
+        if (ctrl && tabId !== undefined) void browser.tabs.update(tabId, { url: n.url });
+        else void browser.tabs.create({ url: n.url, openerTabId: tabId });
       }}
       openDetails={(id) => manager(`#/library/all?edit=${encodeURIComponent(id)}`)}
       showAll={(q) => manager(`#q=${encodeURIComponent(q)}`)}

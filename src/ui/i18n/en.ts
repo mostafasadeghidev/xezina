@@ -315,7 +315,7 @@ export const en = {
   firstBrowser: "Use this browser’s",
   firstBrowserHint: "The storage is replaced by this browser’s bookmarks; your other browsers follow on their next sync.",
   firstBrowserAsk: "Bookmarks that are only in the storage will be removed there and from your other browsers on their next sync. Continue?",
-  spotKeys: "↑ ↓ choose · Enter open · Ctrl+Enter new tab · Shift+Enter edit",
+  spotKeys: "↑ ↓ choose · Enter open in a new tab · Ctrl+Enter open here · Shift+Enter edit",
   shortcutSpotlight: "Search bookmarks from any page",
   shortcutUnset: "Not set: another extension or the browser already uses this key. Choose one with “Change shortcuts”.",
 };
