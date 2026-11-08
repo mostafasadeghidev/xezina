@@ -316,4 +316,7 @@ export const it: Strings = {
   firstBrowser: "Usa questo browser",
   firstBrowserHint: "Lo spazio viene sostituito dai segnalibri di questo browser; gli altri browser si adeguano alla prossima sincronizzazione.",
   firstBrowserAsk: "I segnalibri presenti solo nello spazio verranno eliminati lì e dagli altri browser alla prossima sincronizzazione. Continuare?",
+  spotKeys: "↑ ↓ scegli · Invio apri · Ctrl+Invio nuova scheda · Maiusc+Invio modifica",
+  shortcutSpotlight: "Cerca nei segnalibri da qualsiasi pagina",
+  shortcutUnset: "Non impostata: un’altra estensione o il browser usa già questo tasto. Scegline una con «Modifica scorciatoie».",
 };

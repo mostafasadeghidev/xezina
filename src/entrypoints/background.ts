@@ -139,6 +139,58 @@ function openManager(query = '') {
   void browser.tabs.create({ url });
 }
 
+/**
+ * The search over the current page. Pages an extension may not touch (the
+ * browser's own pages, the web store, PDFs) get it as a small window instead.
+ */
+async function openSpotlight() {
+  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+  const url = browser.runtime.getURL('/spotlight.html') + `?tab=${tab?.id ?? ''}`;
+  if (tab?.id !== undefined) {
+    try {
+      await browser.scripting.executeScript({ target: { tabId: tab.id }, func: toggleSpotlightFrame, args: [url] });
+      return;
+    } catch {
+      // Not allowed on this page: fall through to the window.
+    }
+  }
+  const win = await browser.windows.getCurrent().catch(() => undefined);
+  const width = 760;
+  const height = 520;
+  await browser.windows.create({
+    url: url + '&win=1',
+    type: 'popup',
+    width,
+    height,
+    left: win?.left !== undefined && win.width ? Math.round(win.left + (win.width - width) / 2) : undefined,
+    top: win?.top !== undefined && win.height ? Math.round(win.top + win.height * 0.15) : undefined,
+  });
+}
+
+/** Runs inside the page: shows the search frame, or removes it when it is already there. */
+function toggleSpotlightFrame(src: string) {
+  const old = document.getElementById('xezina-spotlight');
+  if (old) {
+    old.remove();
+    return;
+  }
+  const frame = document.createElement('iframe');
+  frame.id = 'xezina-spotlight';
+  frame.src = src;
+  frame.style.cssText =
+    'all:initial;position:fixed;inset:0;width:100vw;height:100vh;border:0;margin:0;padding:0;z-index:2147483647;background:transparent;color-scheme:normal;display:block';
+  const before = document.activeElement as HTMLElement | null;
+  const onMessage = (e: MessageEvent) => {
+    if (e.source !== frame.contentWindow || e.data !== 'xezina:spotlight:close') return;
+    frame.remove();
+    window.removeEventListener('message', onMessage);
+    before?.focus?.();
+  };
+  window.addEventListener('message', onMessage);
+  frame.addEventListener('load', () => frame.focus());
+  (document.body ?? document.documentElement).appendChild(frame);
+}
+
 export default defineBackground(() => {
   const isFirefox = import.meta.env.FIREFOX;
 
@@ -225,6 +277,7 @@ export default defineBackground(() => {
 
   browser.commands?.onCommand.addListener((cmd) => {
     if (cmd === 'open-manager') openManager();
+    if (cmd === 'spotlight') void openSpotlight();
   });
 
   // Address-bar search: type "bm" + space + words.

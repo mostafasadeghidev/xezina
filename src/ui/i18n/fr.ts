@@ -316,4 +316,7 @@ export const fr: Strings = {
   firstBrowser: "Utiliser ce navigateur",
   firstBrowserHint: "Le stockage est remplacé par les favoris de ce navigateur ; vos autres navigateurs suivent à leur prochaine synchronisation.",
   firstBrowserAsk: "Les favoris présents seulement dans le stockage y seront supprimés, ainsi que dans vos autres navigateurs à leur prochaine synchronisation. Continuer ?",
+  spotKeys: "↑ ↓ choisir · Entrée ouvrir · Ctrl+Entrée nouvel onglet · Maj+Entrée modifier",
+  shortcutSpotlight: "Chercher dans vos favoris depuis n’importe quelle page",
+  shortcutUnset: "Non défini : une autre extension ou le navigateur utilise déjà cette touche. Choisissez-en une via « Modifier les raccourcis ».",
 };

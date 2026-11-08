@@ -211,6 +211,19 @@ function Bookmarking() {
           </div>
           <div className="flex items-start justify-between gap-4">
             <dt>
+              {t('shortcutSpotlight')}
+              {key('spotlight') === '—' && keys.length > 0 && (
+                <span className="mt-0.5 block text-xs leading-relaxed text-warn">{t('shortcutUnset')}</span>
+              )}
+            </dt>
+            <dd className="shrink-0">
+              <kbd className="rounded-md border border-line bg-hover px-2 py-0.5 text-xs" dir="ltr">
+                {key('spotlight')}
+              </kbd>
+            </dd>
+          </div>
+          <div className="flex items-start justify-between gap-4">
+            <dt>
               {t('omniboxLabel')}
               <span className="mt-0.5 block text-xs leading-relaxed text-muted">{t('omniboxHint')}</span>
             </dt>

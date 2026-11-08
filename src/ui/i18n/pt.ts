@@ -316,4 +316,7 @@ export const pt: Strings = {
   firstBrowser: "Usar este navegador",
   firstBrowserHint: "O armazenamento é substituído pelos favoritos deste navegador; os outros navegadores seguem na próxima sincronização.",
   firstBrowserAsk: "Favoritos que só existem no armazenamento serão apagados lá e nos outros navegadores na próxima sincronização. Continuar?",
+  spotKeys: "↑ ↓ escolher · Enter abrir · Ctrl+Enter nova aba · Shift+Enter editar",
+  shortcutSpotlight: "Pesquisar favoritos em qualquer página",
+  shortcutUnset: "Não definido: outra extensão ou o navegador já usa esta tecla. Escolha uma em “Alterar atalhos”.",
 };

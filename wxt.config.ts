@@ -24,6 +24,8 @@ export default defineConfig({
       'identity',
       'activeTab',
       'notifications',
+      // Puts the search (Alt+Shift+D) over the page you are on.
+      'scripting',
       ...(browser === 'firefox' ? [] : ['favicon', 'declarativeNetRequestWithHostAccess']),
     ],
     // Requested at runtime only when the user enables previews, link checks or a remote storage.
@@ -47,10 +49,19 @@ export default defineConfig({
         description: 'Save the current page with notes',
       },
       'open-manager': {
-        suggested_key: { default: 'Alt+Shift+B' },
+        // Not Alt+Shift+B: Edge keeps that one for itself.
+        suggested_key: { default: 'Alt+Shift+M' },
         description: 'Open the bookmark manager',
       },
+      // Alt+Shift+D is free in Chrome, Edge and Firefox on every system (on a Mac: Option+Shift+D);
+      // Edge refuses to give extensions Alt+Shift+A, B, C, I, P, R, T, W, X and Z.
+      spotlight: {
+        suggested_key: { default: 'Alt+Shift+D' },
+        description: 'Search your bookmarks from any page',
+      },
     },
+    web_accessible_resources:
+      browser === 'firefox' ? ['spotlight.html'] : [{ resources: ['spotlight.html'], matches: ['<all_urls>'] }],
     icons: { 16: '/icon/16.png', 32: '/icon/32.png', 48: '/icon/48.png', 96: '/icon/96.png', 128: '/icon/128.png' },
     action: {
       default_title: 'Xezina',

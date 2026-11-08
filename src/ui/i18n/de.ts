@@ -316,4 +316,7 @@ export const de: Strings = {
   firstBrowser: "Diesen Browser verwenden",
   firstBrowserHint: "Der Speicher wird durch die Lesezeichen dieses Browsers ersetzt; Ihre anderen Browser folgen bei der nächsten Synchronisierung.",
   firstBrowserAsk: "Lesezeichen, die nur im Speicher sind, werden dort und bei der nächsten Synchronisierung in Ihren anderen Browsern entfernt. Fortfahren?",
+  spotKeys: "↑ ↓ auswählen · Enter öffnen · Strg+Enter neuer Tab · Shift+Enter bearbeiten",
+  shortcutSpotlight: "Lesezeichen von jeder Seite aus suchen",
+  shortcutUnset: "Nicht gesetzt: eine andere Erweiterung oder der Browser nutzt diese Taste schon. Wähle eine unter „Tastenkürzel ändern“.",
 };

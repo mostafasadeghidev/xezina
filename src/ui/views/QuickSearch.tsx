@@ -21,6 +21,8 @@ export function QuickSearch({
   openDetails,
   showAll,
   remote,
+  onPick,
+  window: inWindow,
 }: {
   lib: Library;
   open: boolean;
@@ -29,6 +31,10 @@ export function QuickSearch({
   /** Continue the search in the full library. */
   showAll: (query: string) => void;
   remote: boolean;
+  /** Opens the chosen bookmark (default: a new tab). */
+  onPick?: (n: TreeNode, newTab: boolean) => void;
+  /** Fills a small window of its own instead of floating over a page. */
+  window?: boolean;
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState('');
@@ -62,8 +68,9 @@ export function QuickSearch({
 
   if (!open) return null;
 
-  const go = (n: TreeNode) => {
-    window.open(n.url, '_blank', 'noopener');
+  const go = (n: TreeNode, newTab = false) => {
+    if (onPick) onPick(n, newTab);
+    else window.open(n.url, '_blank', 'noopener');
     onClose();
   };
 
@@ -79,7 +86,7 @@ export function QuickSearch({
       if (e.shiftKey) {
         openDetails(hits[active].id);
         onClose();
-      } else go(hits[active]);
+      } else go(hits[active], e.ctrlKey || e.metaKey);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       onClose();
@@ -89,9 +96,12 @@ export function QuickSearch({
   const current = hits[active];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/45 p-4 pt-[10vh] backdrop-blur-sm" onMouseDown={onClose}>
+    <div
+      className={cx('fixed inset-0 z-50 flex items-start justify-center', inWindow ? 'bg-panel' : 'bg-black/45 p-4 pt-[10vh] backdrop-blur-sm')}
+      onMouseDown={onClose}
+    >
       <div
-        className="animate-in w-full max-w-4xl overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl"
+        className={cx('w-full overflow-hidden bg-panel', inWindow ? 'h-full' : 'animate-in max-w-4xl rounded-2xl border border-line shadow-2xl')}
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -119,7 +129,7 @@ export function QuickSearch({
                   key={n.id}
                   data-i={i}
                   onMouseEnter={() => setActive(i)}
-                  onClick={() => go(n)}
+                  onClick={(e) => go(n, e.ctrlKey || e.metaKey)}
                   className={cx('flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start transition', i === active ? 'bg-accent-soft' : 'hover:bg-hover')}
                 >
                   <Favicon url={n.url} size={20} remote={remote} />
@@ -163,7 +173,7 @@ export function QuickSearch({
           <p className="p-10 text-center text-sm text-muted">{t('noResults')}</p>
         )}
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line px-4 py-2 text-[11px] text-muted">
-          <span dir="ltr">{t('homeKeys')}</span>
+          <span dir="ltr">{t(onPick ? 'spotKeys' : 'homeKeys')}</span>
           <span>{t('omniboxTip')}</span>
         </div>
       </div>

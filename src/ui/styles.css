@@ -109,3 +109,11 @@ body {
 .xz-flash {
   animation: xz-flash 1.3s ease-in-out 2;
 }
+
+/* The search over other pages: see-through, and the same color scheme as the
+   page around it (a different one would paint the frame opaque). */
+:root.spot,
+:root.spot body {
+  background: transparent;
+  color-scheme: normal;
+}
